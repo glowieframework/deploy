@@ -1,0 +1,26 @@
+{
+    "name": "glowieframework/deploy",
+    "description": "Glowie deploy plugin",
+    "license": "MIT",
+    "homepage": "https://glowie.gabrielsilva.dev.br",
+    "support": {
+        "issues": "https://github.com/glowieframework/deploy/issues",
+        "source": "https://github.com/glowieframework/deploy"
+    },
+    "authors": [
+        {
+            "name": "Gabriel Silva",
+            "email": "glowie@gabrielsilva.dev.br",
+            "homepage": "https://glowie.gabrielsilva.dev.br"
+        }
+    ],
+    "require": {
+        "glowieframework/glowie-core": "^1.8",
+        "ext-ssh2": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Glowie\\Plugins\\Deploy\\": "src/"
+        }
+    }
+}
