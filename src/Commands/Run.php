@@ -32,6 +32,7 @@ class Run extends Command
             try {
                 // Calls the task
                 $tasks->{$task}();
+                $tasks->processCommands();
             } catch (\Throwable $th) {
                 // On failure, calls the fail method if exists
                 if (is_callable([$tasks, 'fail'])) $tasks->fail($task, $th);

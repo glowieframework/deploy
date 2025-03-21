@@ -2,6 +2,7 @@
 
 namespace Glowie\Plugins\Deploy\Core;
 
+use Config;
 use Exception;
 use Glowie\Core\CLI\Firefly;
 
@@ -9,14 +10,10 @@ trait Tasks
 {
 
     /**
-     * Runs a set of commands in a server.
-     * @param array $commands List of commands to run.
-     * @param mixed $server (Optional) Server name (or an array of server names) where to run the command. Leave empty for all.
+     * Array of commands to be run on each server.
+     * @var array
      */
-    public function commands(array $commands = [], $server = null)
-    {
-        $this->command(implode(' && ', $commands), $server);
-    }
+    private $__scripts = [];
 
     /**
      * Runs a command in a server.
@@ -25,39 +22,65 @@ trait Tasks
      */
     public function command(string $command, $server = null)
     {
-        foreach ($this->servers as $serverName => $serverInfo) {
-            // Checks if this command should run on the server
-            if (!empty($server) && !in_array($serverName, (array)$server)) {
-                continue;
-            }
+        // If server is not defined, get all names
+        if (empty($server)) $server = array_keys(Config::get('deploy.servers', []));
 
-            // Checks if the connection exists
-            $connection = Connections::get($serverName);
-            if (!$connection) $connection = Connections::connect($serverName, $serverInfo);
+        // Add the command to the server history
+        foreach ((array)$server as $serverName) {
+            if (!isset($this->__scripts[$serverName])) $this->__scripts[$serverName] = [];
+            $this->__scripts[$serverName][] = $command;
+        }
+    }
 
-            // Runs the command in the connection
-            if ($connection) {
-                $this->print("[$serverName] => $command", 'magenta');
+    /**
+     * Processes the commands at once.
+     */
+    public function processCommands()
+    {
+        foreach ($this->__scripts as $serverName => $scripts) {
+            $this->runScriptsOnServer($scripts, $serverName);
+        }
 
-                $error = null;
-                $output = $connection->exec($command, $error);
+        // Clear the scripts
+        $this->__scripts = [];
+    }
 
-                if ($error) {
-                    $error = explode(PHP_EOL, $error);
+    /**
+     * Run a set of scripts in a remote server.
+     * @param array $scripts Array of scripts.
+     * @param string $serverName Name of the server.
+     */
+    private function runScriptsOnServer(array $scripts, string $serverName)
+    {
+        // Checks if the server config exists
+        $serverInfo = Config::get("deploy.servers.$serverName");
+        if (empty($serverInfo)) throw new Exception("Server \"$serverName\" configuration does not exist");
 
-                    foreach ($error as $line) {
-                        $line = trim($line);
-                        if ($line !== '') $this->print("    >> $line");
-                    }
+        // Parses the scripts to a single command
+        $command = implode(' && ', $scripts);
 
-                    throw new Exception("Command \"$command\" failed on server \"$serverName\"");
-                } else if (!empty($output)) {
-                    $output = explode(PHP_EOL, $output);
+        // Checks if the connection exists
+        $connection = Connections::get($serverName);
+        if (!$connection) $connection = Connections::connect($serverName, $serverInfo);
 
-                    foreach ($output as $line) {
-                        $line = trim($line);
-                        if ($line !== '') $this->print("    >> $line");
-                    }
+        // Runs the command in the connection
+        if ($connection) {
+            $this->print("[$serverName] => $command", 'magenta');
+
+            $error = null;
+            $output = $connection->exec($command, $error);
+
+            if ($error) {
+                foreach (explode(PHP_EOL, $error) as $line) {
+                    $line = trim($line);
+                    if ($line !== '') $this->print("    >> $line", 'red');
+                }
+
+                throw new Exception("Command \"$command\" failed on server \"$serverName\"");
+            } else if (!empty($output)) {
+                foreach (explode(PHP_EOL, $output) as $line) {
+                    $line = trim($line);
+                    if ($line !== '') $this->print("    >> $line", 'yellow');
                 }
             }
         }

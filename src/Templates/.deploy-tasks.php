@@ -1,34 +1,20 @@
 <?php
 
 use Glowie\Plugins\Deploy\Core\Tasks;
-use Env;
-use Throwable;
 
 return new class {
     use Tasks;
 
     /**
-     * Servers info.
-     * @var array
-     */
-    private $servers = [];
-
-    /**
-     * Here you can setup the deploy and configure your servers.
+     * This method runs before the task.
      */
     public function init()
     {
-        $this->servers['localhost'] = [
-            'host' => Env::get('SSH_HOST'),
-            'port' => Env::get('SSH_PORT', 22),
-            'auth' => Env::get('SSH_AUTH', 'password'),
-            'username' => Env::get('SSH_USER'),
-            'password' => Env::get('SSH_PASSWORD')
-        ];
+        //
     }
 
     /**
-     * Deploy task.
+     * The deploy task itself. All the commands must run here.
      */
     public function deploy()
     {

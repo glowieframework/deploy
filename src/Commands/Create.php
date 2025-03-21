@@ -19,7 +19,7 @@ class Create extends Command
         }
 
         // Create the tasks file
-        copy(realpath(__DIR__ . '/../Templates/.deploy-tasks.php'), $path);
+        copy(__DIR__ . '/../Templates/.deploy-tasks.php', $path);
         $this->success('Tasks file created successfully!');
         $this->info('File: ' . $path);
     }
