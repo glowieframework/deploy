@@ -6,10 +6,30 @@ use Exception;
 
 class SSH
 {
+
+    /**
+     * The connection handler.
+     * @var resource|null
+     */
     private $connection;
+
+    /**
+     * Server hostname.
+     * @var string
+     */
     private $host;
+
+    /**
+     * Server port.
+     * @var int
+     */
     private $port;
 
+    /**
+     * Creates a new SSH connection.
+     * @param string $host Server hostname.
+     * @param int $port (Optional) Server port.
+     */
     public function __construct(string $host, int $port = 22)
     {
         $this->host = $host;
@@ -21,6 +41,12 @@ class SSH
         }
     }
 
+    /**
+     * Authenticates over SSH using username and password.
+     * @param string $username Username to authenticate.
+     * @param string $password Password to authenticate.
+     * @return bool Returns true on success, false otherwise.
+     */
     public function authenticate(string $username, string $password)
     {
         if (!$this->connection) {
@@ -37,7 +63,15 @@ class SSH
         return true;
     }
 
-    public function authenticateKeys(string $username, string $publicKey, string $privateKey, ?string $passphrase)
+    /**
+     * Authenticates over SSH using a pair of keys.
+     * @param string $username Username to authenticate.
+     * @param string $publicKey Public key file path.
+     * @param string $privateKey Private key file path.
+     * @param string|null $passphrase (Optional) Passphrase if the files are encrypted.
+     * @return bool Returns true on success, false otherwise.
+     */
+    public function authenticateKeys(string $username, string $publicKey, string $privateKey, ?string $passphrase = null)
     {
         if (!$this->connection) {
             throw new Exception('SSH connection was not established');
@@ -53,6 +87,11 @@ class SSH
         return true;
     }
 
+    /**
+     * Authenticates over SSH using ssh-agent
+     * @param string $username Username to authenticate.
+     * @return bool Returns true on success, false otherwise.
+     */
     public function authenticateAgent(string $username)
     {
         if (!$this->connection) {
@@ -69,6 +108,9 @@ class SSH
         return true;
     }
 
+    /**
+     * Disconnects from the server.
+     */
     public function disconnect()
     {
         if (!$this->connection) {
@@ -79,6 +121,12 @@ class SSH
         $this->connection = null;
     }
 
+    /**
+     * Executes a command in the server.
+     * @param string $command Command to run.
+     * @param string|null &$stdErr Variable to store the errors, if any.
+     * @return mixed Returns the command output.
+     */
     public function exec(string $command, &$stdErr = null)
     {
         if (!$this->connection) {
@@ -98,7 +146,13 @@ class SSH
         return $stdIo;
     }
 
-    private function getOutput($stream, $id)
+    /**
+     * Gets a stream output.
+     * @param resource $stream Stream to get.
+     * @param int $id Stream ID.
+     * @return mixed Returns the output.
+     */
+    private function getOutput($stream, int $id)
     {
         $streamOut = @ssh2_fetch_stream($stream, $id);
         return stream_get_contents($streamOut);

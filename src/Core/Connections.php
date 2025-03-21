@@ -7,18 +7,38 @@ use Exception;
 class Connections
 {
 
+    /**
+     * List of open connections.
+     * @var SSH[]
+     */
     private static $connections = [];
 
+    /**
+     * Gets a connection.
+     * @param string $name Server name.
+     * @return SSH|null Connection resource if exists.
+     */
     public static function get(string $name)
     {
         return self::$connections[$name] ?? null;
     }
 
+    /**
+     * Set a connection.
+     * @param string $name Server name.
+     * @param SSH|null $connection Connection resource.
+     */
     public static function set(string $name, $connection)
     {
         self::$connections[$name] = $connection;
     }
 
+    /**
+     * Connects to a server.
+     * @param string $serverName Name of the server.
+     * @param array $serverInfo Associative array of info about the server.
+     * @return SSH|null Connection resource if exists.
+     */
     public static function connect(string $serverName, array $serverInfo)
     {
         // Checks if the connection already exists
@@ -64,5 +84,27 @@ class Connections
 
         // Returns the connection instance
         return self::get($serverName);
+    }
+
+    /**
+     * Disconnects from a server.
+     * @param string $serverName Server name to disconnect.
+     */
+    public static function disconnect(string $serverName)
+    {
+        $connection = self::get($serverName);
+        if ($connection) $connection->disconnect();
+        unset(self::$connections[$serverName]);
+    }
+
+    /**
+     * Disconnects from all servers.
+     */
+    public static function disconnectAll()
+    {
+        foreach (self::$connections as $serverName => $connection) {
+            if ($connection) $connection->disconnect();
+            unset(self::$connections[$serverName]);
+        }
     }
 }

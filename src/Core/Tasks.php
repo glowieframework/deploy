@@ -8,11 +8,21 @@ use Glowie\Core\CLI\Firefly;
 trait Tasks
 {
 
+    /**
+     * Runs a set of commands in a server.
+     * @param array $commands List of commands to run.
+     * @param mixed $server (Optional) Server name (or an array of server names) where to run the command. Leave empty for all.
+     */
     public function commands(array $commands = [], $server = null)
     {
-        return $this->command(implode(' && ', $commands), $server);
+        $this->command(implode(' && ', $commands), $server);
     }
 
+    /**
+     * Runs a command in a server.
+     * @param string $command Command to run.
+     * @param mixed $server (Optional) Server name (or an array of server names) where to run the command. Leave empty for all.
+     */
     public function command(string $command, $server = null)
     {
         foreach ($this->servers as $serverName => $serverInfo) {
@@ -37,7 +47,7 @@ trait Tasks
 
                     foreach ($error as $line) {
                         $line = trim($line);
-                        if (!empty($line)) $this->print("    >> $line", 'red');
+                        if ($line !== '') $this->print("    >> $line");
                     }
 
                     throw new Exception("Command \"$command\" failed on server \"$serverName\"");
@@ -46,24 +56,55 @@ trait Tasks
 
                     foreach ($output as $line) {
                         $line = trim($line);
-                        if (!empty($line)) $this->print("    >> $line", 'yellow');
+                        if ($line !== '') $this->print("    >> $line");
                     }
                 }
             }
         }
     }
 
-    public function disconnectAll()
+    /**
+     * Gets an argument value.
+     * @param string $arg Argument key to get.
+     * @param mixed $default (Optional) Default value to return if the key does not exist.
+     * @return mixed Returns the value if exists or the default if not.
+     */
+    public function getArg(string $arg, $default = null)
     {
-        foreach ($this->__connections as $name => $connection) {
-            $connection->disconnect();
-            unset($this->__connections[$name]);
-        }
+        return Firefly::getArg($arg, $default);
     }
 
+    /**
+     * Prints a message in the console.
+     * @param string $message Message to print.
+     * @param string|null $color (Optional) Message color (check Firefly CLI available colors).
+     */
     public function print(string $message, ?string $color = null)
     {
         if (!$color) return Firefly::print($message);
         Firefly::print("<color=\"$color\">$message</color>");
+    }
+
+    /**
+     * Sends a notification to Telegram.
+     * @param string $botId Bot token ID.
+     * @param string $chatId Target chat ID.
+     * @param string $message Message to send.
+     * @return bool Returns true on success, false otherwise.
+     */
+    public function notifyTelegram(string $botId, string $chatId, string $message)
+    {
+        return Notify::telegram($botId, $chatId, $message);
+    }
+
+    /**
+     * Sends a notification to Discord.
+     * @param string $webhookUrl Webhook URL.
+     * @param string $message Message to send.
+     * @return bool Returns true on success, false otherwise.
+     */
+    public function notifyDiscord(string $webhookUrl, string $message)
+    {
+        return Notify::discord($webhookUrl, $message);
     }
 }
