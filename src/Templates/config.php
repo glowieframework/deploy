@@ -5,7 +5,7 @@ return [
     // Configurations for Glowie Deploy plugin
     'deploy' => [
 
-        // Array with all the servers
+        // Associative array with all the servers
         'servers' => [
 
             'localhost' => [
@@ -13,7 +13,7 @@ return [
             ],
 
             'web' => [
-                'host' => Env::get('SSH_HOST', 'localhost'),
+                'host' => Env::get('SSH_HOST'),
                 'port' => Env::get('SSH_PORT', 22),
                 'auth' => Env::get('SSH_AUTH', 'password'),
                 'username' => Env::get('SSH_USER', 'root'),

@@ -54,6 +54,53 @@ Each command will run in order and wait for the previous command to finish befor
 
 Each command output will be printed to the terminal upon its execution.
 
+### Specifying the target server
+
+By default, all commands will run in all servers from the config file. If you want to run a command in a single server, pass the server name as the second argument of the `command()` method. You can also use an array of server names.
+
+```php
+$this->command('cd /var/www/my-project', 'homologation');
+// Runs only in "homologation" server
+
+$this->command('git pull', ['homologation', 'production']);
+// Runs in both "homologation" and "production" servers
+```
+
+### Printing messages in the console
+
+To print a custom message in the console, use:
+
+```php
+$this->print('My custom message');
+```
+
+You can also pass an optional color name as the second argument.
+
+### After success
+
+If you want to do something when your task ends the execution with success (no command returned a code greater than `0`), create the following method in the tasks file:
+
+```php
+public function success(string $task){
+    // You can do anything here
+    $this->print("$task ran successfully!");
+}
+```
+
+The method will receive the task name as the first parameter.
+
+### Handling errors
+
+If something in your task fails, the script execution will stop and a exception will be thrown. If you want to capture the error and do something with it (like sending a notification), create the following method in the tasks file:
+
+```php
+public function fail(string $task, Throwable $th){
+    //
+}
+```
+
+The method will receive the task name as the first parameter, and the exception as the second. This is called for errors in any task from the tasks file.
+
 ## Running a deploy task
 
 Open the terminal in the root of your application and run:
@@ -67,3 +114,21 @@ This will run the default `deploy()` task. If you want to run another task, pass
 ```shell
 php firefly deploy:run --task=myTask
 ```
+
+### Passing arguments
+
+If you want to pass a custom argument to the task, just send it in the terminal using the syntax:
+
+```shell
+php firefly deploy:run --version=1.0.0
+```
+
+To get this argument value from within your tasks file, use:
+
+```php
+$version = $this->getArg('version');
+```
+
+## Credits
+
+Deploy and Glowie are currently being developed by [Gabriel Silva](https://gabrielsilva.dev.br).

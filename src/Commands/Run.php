@@ -36,7 +36,7 @@ class Run extends Command
         // Checks if the task exists
         if (is_callable([$tasks, $task])) {
             // Calls the init method if exists
-            if (is_callable([$tasks, 'init'])) $tasks->init();
+            if (is_callable([$tasks, 'init'])) $tasks->init($task);
 
             try {
                 // Calls the task

@@ -7,8 +7,9 @@ return new class {
 
     /**
      * This method runs before the task.
+     * @param string $task Receives the task name.
      */
-    public function init()
+    public function init(string $task)
     {
         //
     }
