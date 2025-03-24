@@ -9,14 +9,14 @@ class Connections
 
     /**
      * List of open connections.
-     * @var SSH[]
+     * @var array
      */
     private static $connections = [];
 
     /**
      * Gets a connection.
      * @param string $name Server name.
-     * @return SSH|null Connection resource if exists.
+     * @return mixed Connection resource if exists.
      */
     public static function get(string $name)
     {
@@ -26,7 +26,7 @@ class Connections
     /**
      * Set a connection.
      * @param string $name Server name.
-     * @param SSH|null $connection Connection resource.
+     * @param mixed $connection Connection resource.
      */
     public static function set(string $name, $connection)
     {
@@ -37,7 +37,7 @@ class Connections
      * Connects to a server.
      * @param string $serverName Name of the server.
      * @param array $serverInfo Associative array of info about the server.
-     * @return SSH|null Connection resource if exists.
+     * @return mixed Connection resource if exists.
      */
     public static function connect(string $serverName, array $serverInfo)
     {
@@ -47,6 +47,12 @@ class Connections
 
         // Creates the connection if not exists
         if (empty($connection)) {
+            // Checks if its a local connection
+            if (!empty($serverInfo['local'])) {
+                self::set($serverName, new Local());
+                return self::get($serverName);
+            }
+
             // Validate infos
             if (empty($serverInfo['host'])) throw new Exception("Missing host for server $serverName");
             if (empty($serverInfo['username'])) throw new Exception("Missing username for server $serverName");
