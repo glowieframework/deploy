@@ -6,6 +6,15 @@ use Exception;
 use Glowie\Core\CLI\Command;
 use Glowie\Plugins\Deploy\Core\Connections;
 
+/**
+ * Command to run the deploy tasks.
+ * @category Command
+ * @package glowieframework/deploy
+ * @author Glowie
+ * @copyright Copyright (c) Glowie
+ * @license MIT
+ * @link https://glowie.gabrielsilva.dev.br
+ */
 class Run extends Command
 {
 

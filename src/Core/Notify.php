@@ -3,37 +3,83 @@
 namespace Glowie\Plugins\Deploy\Core;
 
 use Glowie\Core\Tools\Crawler;
+use Config;
+use Exception;
 use Util;
 
+/**
+ * Deploy notifications utility.
+ * @category Plugin
+ * @package glowieframework/deploy
+ * @author Glowie
+ * @copyright Copyright (c) Glowie
+ * @license MIT
+ * @link https://glowie.gabrielsilva.dev.br
+ */
 class Notify
 {
 
     /**
      * Sends a notification to Telegram.
-     * @param string $botId Bot token ID.
-     * @param string $chatId Target chat ID.
      * @param string $message Message to send.
      * @return bool Returns true on success, false otherwise.
      */
-    public static function telegram(string $botId, string $chatId, string $message)
+    public static function telegram(string $message)
     {
+        $botId = Config::get('deploy.notifications.telegram.bot_id');
+        $chatId = Config::get('deploy.notifications.telegram.chat_id');
+        if (empty($botId) || empty($chatId)) throw new Exception('Telegram notifications: "bot_id" and "chat_id" keys are missing in your deploy config');
+
         return self::performRequest("https://api.telegram.org/bot$botId/sendMessage", [
             'chat_id' => $chatId,
             'text' => $message
-        ], 'GET', false);
+        ], 'GET', true);
     }
 
     /**
      * Sends a notification to Discord.
-     * @param string $webhookUrl Webhook URL.
      * @param string $message Message to send.
      * @return bool Returns true on success, false otherwise.
      */
-    public static function discord(string $webhookUrl, string $message)
+    public static function discord(string $message)
     {
+        $webhookUrl = Config::get('deploy.notifications.discord');
+        if (empty($webhookUrl)) throw new Exception('Discord notifications: "discord" key is missing in your deploy config');
+
         return self::performRequest($webhookUrl, [
             'content' => Util::limitString($message, 2000)
         ]);
+    }
+
+    /**
+     * Sends a notification to Slack.
+     * @param string $message Message to send.
+     * @return bool Returns true on success, false otherwise.
+     */
+    public static function slack(string $message)
+    {
+        $webhookUrl = Config::get('deploy.notifications.slack');
+        if (empty($webhookUrl)) throw new Exception('Slack notifications: "slack" key is missing in your deploy config');
+
+        return self::performRequest($webhookUrl, [
+            'text' => $message
+        ]);
+    }
+
+    /**
+     * Sends a push notification with Alertzy.
+     * @param string $message Message to send.
+     * @return bool Returns true on success, false otherwise.
+     */
+    public static function alertzy(string $message)
+    {
+        $key = Config::get('deploy.notifications.alertzy');
+        if (empty($key)) throw new Exception('Alertzy notifications: "alertzy" key is missing in your deploy config');
+
+        return self::performRequest('https://alertzy.app/send', [
+            'accountKey' => $key,
+            'message' => $message
+        ], 'POST', true);
     }
 
     /**
@@ -41,12 +87,19 @@ class Notify
      * @param string $url URL to request.
      * @param array $data (Optional) Data to pass.
      * @param string $method (Optional) HTTP method.
+     * @param bool $asForm (Optional) Send request as form data instead of JSON.
      * @return bool Returns true on success, false otherwise.
      */
-    private static function performRequest(string $url, array $data = [], string $method = 'POST')
+    private static function performRequest(string $url, array $data = [], string $method = 'POST', bool $asForm = false)
     {
         $request = (new Crawler())->throwOnError()->bypassVerification();
-        if ($method === 'POST') $request->asJson();
+
+        if ($asForm) {
+            $request->asForm();
+        } else {
+            $request->asJson();
+        }
+
         $result = $request->request($url, $method, $data);
         return !empty($result);
     }

@@ -4,6 +4,15 @@ namespace Glowie\Plugins\Deploy\Core;
 
 use Exception;
 
+/**
+ * Deploy SSH commands handler.
+ * @category Plugin
+ * @package glowieframework/deploy
+ * @author Glowie
+ * @copyright Copyright (c) Glowie
+ * @license MIT
+ * @link https://glowie.gabrielsilva.dev.br
+ */
 class SSH
 {
 

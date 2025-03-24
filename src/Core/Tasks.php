@@ -6,6 +6,15 @@ use Config;
 use Exception;
 use Glowie\Core\CLI\Firefly;
 
+/**
+ * Base trait to deploy tasks file.
+ * @category Trait
+ * @package glowieframework/deploy
+ * @author Glowie
+ * @copyright Copyright (c) Glowie
+ * @license MIT
+ * @link https://glowie.gabrielsilva.dev.br
+ */
 trait Tasks
 {
 
@@ -110,24 +119,41 @@ trait Tasks
 
     /**
      * Sends a notification to Telegram.
-     * @param string $botId Bot token ID.
-     * @param string $chatId Target chat ID.
      * @param string $message Message to send.
      * @return bool Returns true on success, false otherwise.
      */
-    public function notifyTelegram(string $botId, string $chatId, string $message)
+    public function notifyTelegram(string $message)
     {
-        return Notify::telegram($botId, $chatId, $message);
+        return Notify::telegram($message);
     }
 
     /**
      * Sends a notification to Discord.
-     * @param string $webhookUrl Webhook URL.
      * @param string $message Message to send.
      * @return bool Returns true on success, false otherwise.
      */
-    public function notifyDiscord(string $webhookUrl, string $message)
+    public function notifyDiscord(string $message)
     {
-        return Notify::discord($webhookUrl, $message);
+        return Notify::discord($message);
+    }
+
+    /**
+     * Sends a push notification with Alertzy.
+     * @param string $message Message to send.
+     * @return bool Returns true on success, false otherwise.
+     */
+    public function notifyAlertzy(string $message)
+    {
+        return Notify::alertzy($message);
+    }
+
+    /**
+     * Sends a notification to Slack.
+     * @param string $message Message to send.
+     * @return bool Returns true on success, false otherwise.
+     */
+    public function notifySlack(string $message)
+    {
+        return Notify::slack($message);
     }
 }

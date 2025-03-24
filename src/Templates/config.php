@@ -26,6 +26,10 @@ return [
 
             'discord' => Env::get('DISCORD_HOOK'),
 
+            'slack' => Env::get('SLACK_HOOK'),
+
+            'alertzy' => Env::get('ALERTZY_KEY'),
+
             'telegram' => [
                 'bot_id' => Env::get('TELEGRAM_BOT_ID'),
                 'chat_id' => Env::get('TELEGRAM_CHAT_ID')

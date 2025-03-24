@@ -7,6 +7,15 @@ use Glowie\Core\Plugin;
 use Glowie\Plugins\Deploy\Commands\Create;
 use Glowie\Plugins\Deploy\Commands\Run;
 
+/**
+ * Glowie plugin to deploy applications with SSH.
+ * @category Plugin
+ * @package glowieframework/deploy
+ * @author Glowie
+ * @copyright Copyright (c) Glowie
+ * @license MIT
+ * @link https://glowie.gabrielsilva.dev.br
+ */
 class Deploy extends Plugin
 {
 
@@ -16,7 +25,7 @@ class Deploy extends Plugin
      */
     protected $files = [
         __DIR__ . '/Templates/config.php' => 'config/Deploy.php',
-        __DIR__ . '/Templates/.deploy-tasks.php' => '../.deploy-tasks.php'
+        __DIR__ . '/Templates/tasks.php' => '../.deploy-tasks.php'
     ];
 
     /**
