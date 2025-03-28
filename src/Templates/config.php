@@ -13,26 +13,26 @@ return [
             ],
 
             'web' => [
-                'host' => Env::get('SSH_HOST'),
-                'port' => Env::get('SSH_PORT', 22),
-                'auth' => Env::get('SSH_AUTH', 'password'),
-                'username' => Env::get('SSH_USER', 'root'),
-                'password' => Env::get('SSH_PASSWORD'),
+                'host' => env('SSH_HOST'),
+                'port' => env('SSH_PORT', 22),
+                'auth' => env('SSH_AUTH', 'password'),
+                'username' => env('SSH_USER', 'root'),
+                'password' => env('SSH_PASSWORD'),
             ]
         ],
 
         // Notification settings
         'notifications' => [
 
-            'discord' => Env::get('DISCORD_HOOK'),
+            'discord' => env('DISCORD_HOOK'),
 
-            'slack' => Env::get('SLACK_HOOK'),
+            'slack' => env('SLACK_HOOK'),
 
-            'alertzy' => Env::get('ALERTZY_KEY'),
+            'alertzy' => env('ALERTZY_KEY'),
 
             'telegram' => [
-                'bot_id' => Env::get('TELEGRAM_BOT_ID'),
-                'chat_id' => Env::get('TELEGRAM_CHAT_ID')
+                'bot_id' => env('TELEGRAM_BOT_ID'),
+                'chat_id' => env('TELEGRAM_CHAT_ID')
             ]
         ]
     ]

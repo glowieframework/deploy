@@ -2,8 +2,6 @@
 
 namespace Glowie\Plugins\Deploy\Core;
 
-use Glowie\Core\Tools\Crawler;
-use Config;
 use Exception;
 use Util;
 
@@ -26,8 +24,8 @@ class Notify
      */
     public static function telegram(string $message)
     {
-        $botId = Config::get('deploy.notifications.telegram.bot_id');
-        $chatId = Config::get('deploy.notifications.telegram.chat_id');
+        $botId = config('deploy.notifications.telegram.bot_id');
+        $chatId = config('deploy.notifications.telegram.chat_id');
         if (empty($botId) || empty($chatId)) throw new Exception('Telegram notifications: "bot_id" and "chat_id" keys are missing in your deploy config');
 
         return self::performRequest("https://api.telegram.org/bot$botId/sendMessage", [
@@ -43,7 +41,7 @@ class Notify
      */
     public static function discord(string $message)
     {
-        $webhookUrl = Config::get('deploy.notifications.discord');
+        $webhookUrl = config('deploy.notifications.discord');
         if (empty($webhookUrl)) throw new Exception('Discord notifications: "discord" key is missing in your deploy config');
 
         return self::performRequest($webhookUrl, [
@@ -58,7 +56,7 @@ class Notify
      */
     public static function slack(string $message)
     {
-        $webhookUrl = Config::get('deploy.notifications.slack');
+        $webhookUrl = config('deploy.notifications.slack');
         if (empty($webhookUrl)) throw new Exception('Slack notifications: "slack" key is missing in your deploy config');
 
         return self::performRequest($webhookUrl, [
@@ -73,7 +71,7 @@ class Notify
      */
     public static function alertzy(string $message)
     {
-        $key = Config::get('deploy.notifications.alertzy');
+        $key = config('deploy.notifications.alertzy');
         if (empty($key)) throw new Exception('Alertzy notifications: "alertzy" key is missing in your deploy config');
 
         return self::performRequest('https://alertzy.app/send', [
@@ -92,7 +90,8 @@ class Notify
      */
     private static function performRequest(string $url, array $data = [], string $method = 'POST', bool $asForm = false)
     {
-        $request = (new Crawler())->throwOnError()->bypassVerification();
+        $request = http()->throwOnError()
+            ->bypassVerification();
 
         if ($asForm) {
             $request->asForm();

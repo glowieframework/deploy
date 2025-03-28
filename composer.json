@@ -16,6 +16,7 @@
     ],
     "require": {
         "glowieframework/glowie-core": "^1.8",
+        "glowieframework/global-helpers": "^1.0",
         "ext-ssh2": "*"
     },
     "autoload": {
