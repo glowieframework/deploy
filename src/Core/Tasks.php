@@ -2,8 +2,8 @@
 
 namespace Glowie\Plugins\Deploy\Core;
 
-use Exception;
 use Glowie\Core\CLI\Firefly;
+use Glowie\Core\Exception\PluginException;
 
 /**
  * Base trait to deploy tasks file.
@@ -62,7 +62,7 @@ trait Tasks
     {
         // Checks if the server config exists
         $serverInfo = config("deploy.servers.$serverName");
-        if (empty($serverInfo)) throw new Exception("Server \"$serverName\" configuration does not exist");
+        if (empty($serverInfo)) throw new PluginException("[Deploy] Server \"$serverName\" configuration does not exist");
 
         // Parses the scripts to a single command
         $command = implode(' && ', $scripts);
@@ -84,7 +84,7 @@ trait Tasks
                     if ($line !== '') $this->print("    >> $line", 'red');
                 }
 
-                throw new Exception("Command \"$command\" failed on server \"$serverName\"");
+                throw new PluginException("[Deploy] Command \"$command\" failed on server \"$serverName\"");
             } else if (!empty($output)) {
                 foreach (explode(PHP_EOL, $output) as $line) {
                     $line = trim($line);
@@ -177,9 +177,9 @@ trait Tasks
      * @param string $message Message to send.
      * @return bool Returns true on success, false otherwise.
      */
-    public function notifyAlertzy(string $message)
+    public function notifyPush(string $message)
     {
-        return Notify::alertzy($message);
+        return Notify::push($message);
     }
 
     /**

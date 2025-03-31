@@ -33,11 +33,17 @@ This will create a `Deploy.php` file in your `app/config` folder, this is where 
 
 It will also create a `.deploy-tasks.php` file in the root of your application, this is the main entry point for your deploy scripts.
 
+If you want to create the tasks file manually in the current project directory, run:
+
+```shell
+php firefly deploy:create
+```
+
 ## Writing tasks
 
 Your deploy tasks must be written in the `.deploy-tasks.php` file. A task is a PHP function that will be called in the deploy lifecycle.
 
-To run shell commands in the target server, use:
+To run shell commands in the target servers, use:
 
 ```php
 public function deploy(){
@@ -47,7 +53,7 @@ public function deploy(){
     $this->command('git pull');
 
     $this->command('php firefly migrate');
-    
+
 }
 ```
 
@@ -126,6 +132,12 @@ This will run the default `deploy()` task. If you want to run another task, pass
 php firefly deploy:run --task=myTask
 ```
 
+Alternatively, you can also specify the target tasks file, if you are not using the default `.deploy-tasks.php` in the current working directory:
+
+```shell
+php firefly deploy:run --path=/path/to/.deploy-tasks.php
+```
+
 ### Passing CLI arguments and options
 
 If you want to pass a custom argument to the task, just send it in the terminal using the syntax:
@@ -151,6 +163,70 @@ And retrieve from your task:
 ```php
 $isProduction = $this->hasOption('production'); // returns true
 ```
+
+## Notifications
+
+Glowie Deploy also supports sending notifications to some services. You can use this feature to inform the tasks progresses or errors on your favorite applications.
+
+### Discord
+
+To send a notification as a message to a Discord channel, create a [Discord webhook](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks) and copy its URL to your app `.env` file:
+
+```env
+DEPLOY_DISCORD_URL=https://discord.com/api/webhooks/...
+```
+
+Then, in your task, simply call:
+
+```php
+$this->notifyDiscord('Write your message to Discord here!');
+```
+
+### Slack
+
+To send a notification as a message to a Slack channel, create a [Slack webhook](https://api.slack.com/messaging/webhooks) and copy its URL to your app `.env` file:
+
+```env
+DEPLOY_SLACK_URL=https://hooks.slack.com/...
+```
+
+Then, in your task, simply call:
+
+```php
+$this->notifySlack('Write your message to Slack here!');
+```
+
+### Telegram
+
+To send a notification as a message to a Telegram chat, first create a Telegram bot and grab its ID using [BotFather](https://t.me/botfather). Second, grab the destination chat ID using [IDBot](https://t.me/username_to_id_bot). After that, copy both IDs to your app `.env` file:
+
+```env
+DEPLOY_TELEGRAM_BOT_ID=...
+DEPLOY_TELEGRAM_CHAT_ID=...
+```
+
+Then, in your task, simply call:
+
+```php
+$this->notifyTelegram('Write your message to Telegram here!');
+```
+
+### Push notifications (with Alertzy)
+
+To send a message as a push notification to your phone, download the [Alertzy](https://alertzy.app) app in your phone and create an account. Then, grab your account key in the app and copy to your `.env` file:
+
+```env
+DEPLOY_PUSH_KEY=...
+```
+
+Then, in your task, simply call:
+
+```php
+$this->notifyPush('Write a message to your phone here!');
+```
+
+> [!IMPORTANT]
+> Alertzy has a limit of **100 push notifications per day**. After that limit is reached, notifications will stop being delivered.
 
 ## Credits
 

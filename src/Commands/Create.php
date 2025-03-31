@@ -3,6 +3,7 @@
 namespace Glowie\Plugins\Deploy\Commands;
 
 use Glowie\Core\CLI\Command;
+use Glowie\Core\CLI\Firefly;
 
 /**
  * Command to create the tasks file.
@@ -23,7 +24,7 @@ class Create extends Command
     {
         // Gets the tasks file path
         $path = $this->getArg('path', getcwd() . '/.deploy-tasks.php');
-        if (is_file($path) && !$this->confirm('<color="red">WARNING: The tasks file already exists. Overwrite?</color>')) {
+        if (is_file($path) && !$this->confirm(Firefly::color('WARNING: The tasks file already exists. Overwrite?', 'red'))) {
             return $this->warning('Operation cancelled.');
         }
 

@@ -2,8 +2,8 @@
 
 namespace Glowie\Plugins\Deploy\Commands;
 
-use Exception;
 use Glowie\Core\CLI\Command;
+use Glowie\Core\Exception\PluginException;
 use Glowie\Plugins\Deploy\Core\Connections;
 
 /**
@@ -25,7 +25,7 @@ class Run extends Command
     {
         // Gets the tasks file path
         $path = $this->getArg('path', getcwd() . '/.deploy-tasks.php');
-        if (!is_file($path)) throw new Exception("Tasks file \"$path\" does not exist");
+        if (!is_file($path)) throw new PluginException("[Deploy] Tasks file \"$path\" does not exist");
 
         // Gets the task name
         $task = $this->getArg('task', 'deploy');
@@ -45,13 +45,13 @@ class Run extends Command
             } catch (\Throwable $th) {
                 // On failure, calls the fail method if exists
                 if (is_callable([$tasks, 'fail'])) $tasks->fail($task, $th);
-                throw new Exception("[$task] " . $th->getMessage(), $th->getCode(), $th);
+                throw new PluginException("[Deploy] [$task] " . $th->getMessage(), $th->getCode(), $th);
             }
 
             // On success, calls the success method if exists
             if (is_callable([$tasks, 'success'])) $tasks->success($task);
         } else {
-            throw new Exception("Task \"$task\" does not exist in the tasks file");
+            throw new PluginException("[Deploy] Task \"$task\" does not exist in the tasks file");
         }
 
         // End all connections

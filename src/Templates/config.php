@@ -24,26 +24,26 @@ return [
             ],
 
             'web' => [
-                'host' => env('SSH_HOST'),
-                'port' => env('SSH_PORT', 22),
-                'auth' => env('SSH_AUTH', 'password'),
-                'username' => env('SSH_USER', 'root'),
-                'password' => env('SSH_PASSWORD'),
+                'host' => env('DEPLOY_SSH_HOST'),
+                'port' => env('DEPLOY_SSH_PORT', 22),
+                'auth' => env('DEPLOY_SSH_AUTH', 'password'),
+                'username' => env('DEPLOY_SSH_USER', 'root'),
+                'password' => env('DEPLOY_SSH_PASSWORD'),
             ]
         ],
 
         // Notification settings
         'notifications' => [
 
-            'discord' => env('DISCORD_HOOK'),
+            'discord' => env('DEPLOY_DISCORD_URL'),
 
-            'slack' => env('SLACK_HOOK'),
+            'slack' => env('DEPLOY_SLACK_URL'),
 
-            'alertzy' => env('ALERTZY_KEY'),
+            'push' => env('DEPLOY_PUSH_KEY'),
 
             'telegram' => [
-                'bot_id' => env('TELEGRAM_BOT_ID'),
-                'chat_id' => env('TELEGRAM_CHAT_ID')
+                'bot_id' => env('DEPLOY_TELEGRAM_BOT_ID'),
+                'chat_id' => env('DEPLOY_TELEGRAM_CHAT_ID')
             ]
         ]
     ]
