@@ -47,6 +47,7 @@ public function deploy(){
     $this->command('git pull');
 
     $this->command('php firefly migrate');
+    
 }
 ```
 
@@ -59,11 +60,11 @@ Each command output will be printed to the terminal upon its execution.
 By default, all commands will run in all servers from the config file. If you want to run a command in a single server, pass the server name as the second argument of the `command()` method. You can also use an array of server names.
 
 ```php
-$this->command('cd /var/www/my-project', 'homologation');
 // Runs only in "homologation" server
+$this->command('cd /var/www/my-project', 'homologation');
 
-$this->command('git pull', ['homologation', 'production']);
 // Runs in both "homologation" and "production" servers
+$this->command('git pull', ['homologation', 'production']);
 ```
 
 ### Printing messages in the console
@@ -74,7 +75,15 @@ To print a custom message in the console, use:
 $this->print('My custom message');
 ```
 
-You can also pass an optional color name as the second argument.
+You can also pass an optional color name as the second argument or use one of the aliases:
+
+```php
+$this->error('Something failed!');
+
+$this->success('Everything works great.');
+
+$this->warning('Be careful...');
+```
 
 ### After success
 
@@ -83,7 +92,7 @@ If you want to do something when your task ends the execution with success (no c
 ```php
 public function success(string $task){
     // You can do anything here
-    $this->print("$task ran successfully!");
+    $this->success("$task ran successfully!");
 }
 ```
 
@@ -95,7 +104,9 @@ If something in your task fails, the script execution will stop and a exception 
 
 ```php
 public function fail(string $task, Throwable $th){
-    //
+    // You can do anything here
+    $this->error("$task failed! Stack trace:");
+    $this->error($th->getTraceAsString());
 }
 ```
 
@@ -115,7 +126,7 @@ This will run the default `deploy()` task. If you want to run another task, pass
 php firefly deploy:run --task=myTask
 ```
 
-### Passing arguments
+### Passing CLI arguments and options
 
 If you want to pass a custom argument to the task, just send it in the terminal using the syntax:
 
@@ -126,7 +137,19 @@ php firefly deploy:run --version=1.0.0
 To get this argument value from within your tasks file, use:
 
 ```php
-$version = $this->getArg('version');
+$version = $this->getArg('version'); // returns "1.0.0"
+```
+
+You can also pass custom options:
+
+```shell
+php firefly deploy:run --production
+```
+
+And retrieve from your task:
+
+```php
+$isProduction = $this->hasOption('production'); // returns true
 ```
 
 ## Credits

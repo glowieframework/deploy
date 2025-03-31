@@ -106,14 +106,50 @@ trait Tasks
     }
 
     /**
+     * Checks if an option exists.
+     * @param string $key Option key to get.
+     * @return bool Returns true if the option exists, false otherwise.
+     */
+    public function hasOption(string $key)
+    {
+        return $this->getArg($key) === '';
+    }
+
+    /**
      * Prints a message in the console.
      * @param string $message Message to print.
-     * @param string|null $color (Optional) Message color (check Firefly CLI available colors).
+     * @param string $color (Optional) Message color (check Firefly CLI available colors).
      */
-    public function print(string $message, ?string $color = null)
+    public function print(string $message, string $color = 'default')
     {
-        if (!$color) return Firefly::print($message);
-        Firefly::print("<color=\"$color\">$message</color>");
+        Firefly::print(Firefly::color($message, $color));
+    }
+
+    /**
+     * Prints an error message in the console.
+     * @param string $message Message to print.
+     */
+    public function error(string $message)
+    {
+        $this->print($message, 'red');
+    }
+
+    /**
+     * Prints a warning message in the console.
+     * @param string $message Message to print.
+     */
+    public function warning(string $message)
+    {
+        $this->print($message, 'yellow');
+    }
+
+    /**
+     * Prints a success message in the console.
+     * @param string $message Message to print.
+     */
+    public function success(string $message)
+    {
+        $this->print($message, 'green');
     }
 
     /**

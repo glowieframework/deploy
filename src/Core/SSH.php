@@ -41,6 +41,12 @@ class SSH
      */
     public function __construct(string $host, int $port = 22)
     {
+        // Validate extension
+        if (!extension_loaded('ssh2')) {
+            throw new Exception('Missing ssh2 extension in your PHP installation');
+        }
+
+        // Create connection
         $this->host = $host;
         $this->port = $port;
         $this->connection = @ssh2_connect($host, $port);

@@ -1,5 +1,16 @@
 <?php
 
+/*
+    ---------------------------
+    Deploy configuration
+    ---------------------------
+    In this file you can define your deploy servers and notification settings.
+
+    -----------------------------------------------------------------------------------------
+    WARNING: Sensitive data should never be stored here! Use the environment config instead.
+    -----------------------------------------------------------------------------------------
+*/
+
 return [
 
     // Configurations for Glowie Deploy plugin

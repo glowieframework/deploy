@@ -2,11 +2,19 @@
 
 use Glowie\Plugins\Deploy\Core\Tasks;
 
+/*
+    ---------------------------
+    Deploy tasks file
+    ---------------------------
+    Your deploy tasks must be configured here.
+    Check Deploy docs for more information.
+*/
+
 return new class {
     use Tasks;
 
     /**
-     * This method runs before the task.
+     * This method runs before every task.
      * @param string $task Receives the task name.
      */
     public function init(string $task)
@@ -23,7 +31,7 @@ return new class {
     }
 
     /**
-     * This method runs when the task finishes successfully.
+     * This method runs when any task finishes successfully.
      * @param string $task Receives the task name.
      */
     public function success(string $task)
@@ -32,7 +40,7 @@ return new class {
     }
 
     /**
-     * This method runs when the task fails.
+     * This method runs when any task fails.
      * @param string $task Receives the task name.
      * @param Throwable $th Receives the exception.
      */
