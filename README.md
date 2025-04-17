@@ -1,6 +1,6 @@
 # Glowie Deploy
 
-This is a plugin for [Glowie Framework](https://github.com/glowieframework/glowie) to deploy applications using automated SSH scripts. It allows support for notifications, tasks and environment variables.
+This is a plugin for [Glowie Framework](https://github.com/glowieframework/glowie) that allows deploying applications using automated SSH scripts. It supports notifications, tasks, and environment variables.
 
 ## Requirements
 
@@ -14,7 +14,7 @@ Install in your Glowie project using Composer:
 composer require glowieframework/deploy
 ```
 
-Then add the Deploy class to the `app/config/Config.php` file, into the `plugins` array:
+Then add the **Deploy** class to the `plugins` array in the `app/config/Config.php` file:
 
 ```php
 'plugins' => [
@@ -29,9 +29,9 @@ Make sure to publish the plugin files with the CLI:
 php firefly publish
 ```
 
-This will create a `Deploy.php` file in your `app/config` folder, this is where the plugin settings will be stored.
+This will create a `Deploy.php` file in your `app/config` folder. This is where the plugin settings will be stored.
 
-It will also create a `.deploy-tasks.php` file in the root of your application, this is the main entry point for your deploy scripts.
+It will also create a `.deploy-tasks.php` file in the root of your application, which is the main entry point for your deploy scripts.
 
 If you want to create the tasks file manually in the current project directory, run:
 
@@ -57,9 +57,9 @@ public function deploy(){
 }
 ```
 
-Each command will run in order and wait for the previous command to finish before its execution. If a remote command fails or return an exit code greater than `0`, it will throw an exception and end the script.
+Each command will run in order and wait for the previous command to finish before its execution. If a remote command fails or returns an exit code greater than `0`, an exception will be thrown and the script will stop.
 
-Each command output will be printed to the terminal upon its execution.
+The output of each command will be printed to the terminal upon execution.
 
 ### Specifying the target server
 
@@ -106,7 +106,7 @@ The method will receive the task name as the first parameter.
 
 ### Handling errors
 
-If something in your task fails, the script execution will stop and a exception will be thrown. If you want to capture the error and do something with it (like sending a notification), create the following method in the tasks file:
+If something in your task fails, the script execution will stop and an exception will be thrown. If you want to capture the error and do something with it (like sending a notification), create the following method in the tasks file:
 
 ```php
 public function fail(string $task, Throwable $th){
@@ -116,7 +116,7 @@ public function fail(string $task, Throwable $th){
 }
 ```
 
-The method will receive the task name as the first parameter, and the exception as the second. This is called for errors in any task from the tasks file.
+The method will receive the task name as the first parameter, and the exception as the second. This method is called for errors in any task from the tasks file.
 
 ## Running a deploy task
 
@@ -166,7 +166,7 @@ $isProduction = $this->hasOption('production'); // returns true
 
 ## Notifications
 
-Glowie Deploy also supports sending notifications to some services. You can use this feature to inform the tasks progresses or errors on your favorite applications.
+Glowie Deploy also supports sending notifications to some services. You can use this feature to report task progress or errors to your favorite applications.
 
 ### Discord
 
@@ -230,4 +230,4 @@ $this->notifyPush('Write a message to your phone here!');
 
 ## Credits
 
-Deploy and Glowie are currently being developed by [Gabriel Silva](https://gabrielsilva.dev.br).
+Deploy and Glowie are actively developed by [Gabriel Silva](https://gabrielsilva.dev.br).

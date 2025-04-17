@@ -2,6 +2,7 @@
 
 namespace Glowie\Plugins\Deploy\Core;
 
+use Config;
 use Glowie\Core\CLI\Firefly;
 use Glowie\Core\Exception\PluginException;
 
@@ -31,7 +32,7 @@ trait Tasks
     public function command(string $command, $server = null)
     {
         // If server is not defined, get all names
-        if (empty($server)) $server = array_keys(config('deploy.servers', []));
+        if (empty($server)) $server = array_keys(Config::get('deploy.servers', []));
 
         // Add the command to the server history
         foreach ((array)$server as $serverName) {
@@ -61,7 +62,7 @@ trait Tasks
     private function runScriptsOnServer(array $scripts, string $serverName)
     {
         // Checks if the server config exists
-        $serverInfo = config("deploy.servers.$serverName");
+        $serverInfo = Config::get("deploy.servers.$serverName");
         if (empty($serverInfo)) throw new PluginException("[Deploy] Server \"$serverName\" configuration does not exist");
 
         // Parses the scripts to a single command

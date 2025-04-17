@@ -24,26 +24,26 @@ return [
             ],
 
             'web' => [
-                'host' => env('DEPLOY_SSH_HOST'),
-                'port' => env('DEPLOY_SSH_PORT', 22),
-                'auth' => env('DEPLOY_SSH_AUTH', 'password'),
-                'username' => env('DEPLOY_SSH_USER', 'root'),
-                'password' => env('DEPLOY_SSH_PASSWORD'),
+                'host' => Env::get('DEPLOY_SSH_HOST'),
+                'port' => Env::get('DEPLOY_SSH_PORT', 22),
+                'auth' => Env::get('DEPLOY_SSH_AUTH', 'password'),
+                'username' => Env::get('DEPLOY_SSH_USER', 'root'),
+                'password' => Env::get('DEPLOY_SSH_PASSWORD'),
             ]
         ],
 
         // Notification settings
         'notifications' => [
 
-            'discord' => env('DEPLOY_DISCORD_URL'),
+            'discord' => Env::get('DEPLOY_DISCORD_URL'),
 
-            'slack' => env('DEPLOY_SLACK_URL'),
+            'slack' => Env::get('DEPLOY_SLACK_URL'),
 
-            'push' => env('DEPLOY_PUSH_KEY'),
+            'push' => Env::get('DEPLOY_PUSH_KEY'),
 
             'telegram' => [
-                'bot_id' => env('DEPLOY_TELEGRAM_BOT_ID'),
-                'chat_id' => env('DEPLOY_TELEGRAM_CHAT_ID')
+                'bot_id' => Env::get('DEPLOY_TELEGRAM_BOT_ID'),
+                'chat_id' => Env::get('DEPLOY_TELEGRAM_CHAT_ID')
             ]
         ]
     ]

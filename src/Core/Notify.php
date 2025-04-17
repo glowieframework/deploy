@@ -2,8 +2,10 @@
 
 namespace Glowie\Plugins\Deploy\Core;
 
-use Glowie\Core\Exception\PluginException;
+use Config;
 use Util;
+use Glowie\Core\Exception\PluginException;
+use Glowie\Core\Tools\Crawler;
 
 /**
  * Deploy notifications utility.
@@ -26,8 +28,8 @@ class Notify
      */
     public static function telegram(string $message, ?string $botId = null, ?string $chatId = null)
     {
-        if (empty($botId)) $botId = config('deploy.notifications.telegram.bot_id');
-        if (empty($chatId)) $chatId = config('deploy.notifications.telegram.chat_id');
+        if (empty($botId)) $botId = Config::get('deploy.notifications.telegram.bot_id');
+        if (empty($chatId)) $chatId = Config::get('deploy.notifications.telegram.chat_id');
         if (empty($botId) || empty($chatId)) throw new PluginException('[Deploy] Telegram notifications: "bot_id" and "chat_id" keys are missing in your deploy config');
 
         return self::performRequest("https://api.telegram.org/bot$botId/sendMessage", [
@@ -44,7 +46,7 @@ class Notify
      */
     public static function discord(string $message, ?string $webhookUrl = null)
     {
-        if (empty($webhookUrl)) $webhookUrl = config('deploy.notifications.discord');
+        if (empty($webhookUrl)) $webhookUrl = Config::get('deploy.notifications.discord');
         if (empty($webhookUrl)) throw new PluginException('[Deploy] Discord notifications: "discord" key is missing in your deploy config');
 
         return self::performRequest($webhookUrl, [
@@ -60,7 +62,7 @@ class Notify
      */
     public static function slack(string $message, ?string $webhookUrl = null)
     {
-        if (empty($webhookUrl)) $webhookUrl = config('deploy.notifications.slack');
+        if (empty($webhookUrl)) $webhookUrl = Config::get('deploy.notifications.slack');
         if (empty($webhookUrl)) throw new PluginException('[Deploy] Slack notifications: "slack" key is missing in your deploy config');
 
         return self::performRequest($webhookUrl, [
@@ -76,7 +78,7 @@ class Notify
      */
     public static function push(string $message, ?string $accountKey = null)
     {
-        if (empty($accountKey)) $accountKey = config('deploy.notifications.push');
+        if (empty($accountKey)) $accountKey = Config::get('deploy.notifications.push');
         if (empty($accountKey)) throw new PluginException('[Deploy] Push notifications: "push" key is missing in your deploy config');
 
         return self::performRequest('https://alertzy.app/send', [
@@ -95,7 +97,7 @@ class Notify
      */
     private static function performRequest(string $url, array $data = [], string $method = 'POST', bool $asForm = false)
     {
-        $request = http()->throwOnError()
+        $request = (new Crawler())->throwOnError()
             ->bypassVerification();
 
         if ($asForm) {
