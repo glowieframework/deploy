@@ -39,6 +39,41 @@ If you want to create the tasks file manually in the current project directory, 
 php firefly deploy:create
 ```
 
+## Configuration
+
+When you publish the plugin files, a configuration file named `Deploy.php` will be created in your `app/config` folder. This file is responsible for defining your deploy servers and notification settings.
+
+> [!IMPORTANT]
+> Never store sensitive credentials (like passwords or API keys) directly in this file. Always use environment variables.
+
+### Servers
+
+Under the `servers` key, you can define an associative array of all servers that will be used in your deploy process. Each server should have a **unique** name as the key, and the corresponding connection settings as the value.
+
+```php
+'servers' => [
+
+    'localhost' => [
+        'local' => true // Marks this server as local deployment (no SSH)
+    ],
+
+    'web' => [
+        'host' => Env::get('DEPLOY_SSH_HOST'), // SSH host name or IP address
+        'port' => Env::get('DEPLOY_SSH_PORT', 22), // SSH port (defaults to 22)
+        'auth' => Env::get('DEPLOY_SSH_AUTH', 'password'), // Authentication method, either 'password' or 'key'.
+        'username' => Env::get('DEPLOY_SSH_USER', 'root'), // SSH user name
+        'password' => Env::get('DEPLOY_SSH_PASSWORD'), // SSH password (if using password authentication)
+    ],
+
+    // ... other servers can go here
+
+],
+```
+
+### Notifications
+
+The `notifications` section allows you to configure services to receive real-time updates during the deploy process. Each supported service accepts an API key or webhook URL. Read more about **Notifications** below.
+
 ## Writing tasks
 
 Your deploy tasks must be written in the `.deploy-tasks.php` file. A task is a PHP function that will be called in the deploy lifecycle.
