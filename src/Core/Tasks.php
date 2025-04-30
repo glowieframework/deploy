@@ -154,42 +154,60 @@ trait Tasks
     }
 
     /**
+     * Prints an info message in the console.
+     * @param string $message Message to print.
+     */
+    public function info(string $message)
+    {
+        $this->print($message, 'cyan');
+    }
+
+    /**
      * Sends a notification to Telegram.
      * @param string $message Message to send.
+     * @param array $options (Optional) Associative array of options to send in the request body.
+     * @param string|null $botId (Optional) Custom bot ID to send the notification. Leave empty to use from your deploy config file.
+     * @param string|null $chatId (Optional) Custom chat ID to send the notification. Leave empty to use from your deploy config file.
      * @return bool Returns true on success, false otherwise.
      */
-    public function notifyTelegram(string $message)
+    public function notifyTelegram(string $message, array $options = [], ?string $botId = null, ?string $chatId = null)
     {
-        return Notify::telegram($message);
+        return Notify::telegram($message, $options, $botId, $chatId);
     }
 
     /**
      * Sends a notification to Discord.
      * @param string $message Message to send.
+     * @param array $options (Optional) Associative array of options to send in the request body.
+     * @param string|null $webhookUrl (Optional) Custom webhook URL to send the notification. Leave empty to use from your deploy config file.
      * @return bool Returns true on success, false otherwise.
      */
-    public function notifyDiscord(string $message)
+    public function notifyDiscord(string $message, array $options = [], ?string $webhookUrl = null)
     {
-        return Notify::discord($message);
+        return Notify::discord($message, $options, $webhookUrl);
     }
 
     /**
      * Sends a push notification with Alertzy.
      * @param string $message Message to send.
+     * @param array $options (Optional) Associative array of options to send in the request body.
+     * @param string|null $accountKey (Optional) Custom account key to send the notification. Leave empty to use from your deploy config file.
      * @return bool Returns true on success, false otherwise.
      */
-    public function notifyPush(string $message)
+    public function notifyPush(string $message, array $options = [], ?string $accountKey = null)
     {
-        return Notify::push($message);
+        return Notify::push($message, $options, $accountKey);
     }
 
     /**
      * Sends a notification to Slack.
      * @param string $message Message to send.
+     * @param array $options (Optional) Associative array of options to send in the request body.
+     * @param string|null $webhookUrl (Optional) Custom webhook URL to send the notification. Leave empty to use from your deploy config file.
      * @return bool Returns true on success, false otherwise.
      */
-    public function notifySlack(string $message)
+    public function notifySlack(string $message, array $options = [], ?string $webhookUrl = null)
     {
-        return Notify::slack($message);
+        return Notify::slack($message, $options, $webhookUrl);
     }
 }
