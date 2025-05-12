@@ -29,6 +29,7 @@ addDirectoryToPhar($phar, __DIR__ . '/vendor', 'vendor');
 
 $phar->addFile(__DIR__ . '/composer.json', 'composer.json');
 $phar->addFile(__DIR__ . '/composer.lock', 'composer.lock');
+$phar->addFile(__DIR__ . '/version.txt', 'version.txt');
 
 $stub = "#!/usr/bin/env php\n" . $phar->createDefaultStub('src/Standalone.php');
 $phar->setStub($stub);

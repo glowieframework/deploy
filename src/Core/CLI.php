@@ -8,6 +8,7 @@ use Util;
 use Glowie\Core\CLI\Firefly;
 use Glowie\Core\Error\HandlerCLI;
 use Glowie\Core\Exception\FileException;
+use Glowie\Plugins\Deploy\Commands\Update;
 use Glowie\Plugins\Deploy\Deploy;
 
 /**
@@ -56,7 +57,8 @@ class CLI
         // Gets the command
         array_shift(self::$args);
         if (!isset(self::$args[0])) {
-            Firefly::print(Firefly::color('Glowie Deploy | Standalone mode', 'magenta'));
+            $version = Update::getCurrentVersion();
+            Firefly::print(Firefly::color('Glowie Deploy | Standalone mode | Version ' . $version, 'magenta'));
             Firefly::print(Firefly::color('Usage: deploy run [options]', 'yellow'));
             return;
         }
@@ -73,6 +75,7 @@ class CLI
 
         // Register default commands
         (new Deploy())->register();
+        Firefly::custom('deploy', Update::class);
 
         // Runs the command
         self::triggerCommand($command);
@@ -130,10 +133,10 @@ class CLI
 
             // Args with values
             if (preg_match('/^--([^=]+)=(.+)$/', $value, $match)) {
-                $args[strtolower($match[1])] = $match[2];
-            } else if (preg_match('/^--([a-zA-Z0-9_-]+)$/', $value, $match)) {
+                $args[mb_strtolower($match[1])] = $match[2];
+            } else if (preg_match('/^--([^=]+)$/', $value, $match)) {
                 // Args without values
-                $args[strtolower($match[1])] = '';
+                $args[mb_strtolower($match[1])] = '';
             }
         }
 
