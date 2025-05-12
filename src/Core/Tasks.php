@@ -63,7 +63,7 @@ trait Tasks
     {
         // Checks if the server config exists
         $serverInfo = Config::get("deploy.servers.$serverName");
-        if (empty($serverInfo)) throw new PluginException("[Deploy] Server \"$serverName\" configuration does not exist");
+        if (empty($serverInfo)) throw new PluginException("Server \"$serverName\" configuration does not exist");
 
         // Parses the scripts to a single command
         $command = implode(' && ', $scripts);
@@ -85,7 +85,7 @@ trait Tasks
                     if ($line !== '') $this->print("    >> $line", 'red');
                 }
 
-                throw new PluginException("[Deploy] Command \"$command\" failed on server \"$serverName\"");
+                throw new PluginException("Command \"$command\" failed on server \"$serverName\"");
             } else if (!empty($output)) {
                 foreach (explode(PHP_EOL, $output) as $line) {
                     $line = trim($line);

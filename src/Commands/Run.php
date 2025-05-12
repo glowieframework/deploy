@@ -24,8 +24,11 @@ class Run extends Command
     public function run()
     {
         // Gets the tasks file path
-        $path = $this->getArg('path', getcwd() . '/.deploy-tasks.php');
-        if (!is_file($path)) throw new PluginException("[Deploy] Tasks file \"$path\" does not exist");
+        $path = $this->getArg('path', rtrim(getcwd(), '/') . '/.deploy-tasks.php');
+        if (!is_file($path)) {
+            $this->fail("[Deploy] Tasks file \"$path\" does not exist");
+            exit(127);
+        }
 
         // Gets the task name
         $task = $this->getArg('task', 'deploy');
@@ -45,7 +48,8 @@ class Run extends Command
             } catch (\Throwable $th) {
                 // On failure, calls the fail method if exists
                 if (is_callable([$tasks, 'fail'])) $tasks->fail($task, $th);
-                throw new PluginException("[Deploy] [$task] " . $th->getMessage(), $th->getCode(), $th);
+                $this->fail("[Deploy] Task \"$task\" failed with message: " . $th->getMessage());
+                exit($th->getCode() ? $th->getCode() : 127);
             }
 
             // On success, calls the success method if exists

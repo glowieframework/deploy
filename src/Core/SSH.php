@@ -42,18 +42,13 @@ class SSH
     public function __construct(string $host, int $port = 22)
     {
         // Validate extension
-        if (!extension_loaded('ssh2')) {
-            throw new PluginException('[Deploy] Missing ssh2 extension in your PHP installation');
-        }
+        if (!extension_loaded('ssh2')) throw new PluginException('Missing ssh2 extension in your PHP installation');
 
         // Create connection
         $this->host = $host;
         $this->port = $port;
         $this->connection = @ssh2_connect($host, $port);
-
-        if (!$this->connection) {
-            throw new PluginException("[Deploy] Failed to connect to SSH server at $host:$port");
-        }
+        if (!$this->connection) throw new PluginException("Failed to connect to SSH server at $host:$port");
     }
 
     /**
@@ -64,14 +59,11 @@ class SSH
      */
     public function authenticate(string $username, string $password)
     {
-        if (!$this->connection) {
-            throw new PluginException('[Deploy] SSH connection was not established');
-        }
-
+        if (!$this->connection) throw new PluginException('SSH connection was not established');
         $result = @ssh2_auth_password($this->connection, $username, $password);
 
         if (!$result) {
-            throw new PluginException("[Deploy] Failed to authenticate with username \"$username\" and password on server {$this->host}:{$this->port}");
+            throw new PluginException("Failed to authenticate with username \"$username\" and password on server {$this->host}:{$this->port}");
             return false;
         }
 
@@ -88,14 +80,11 @@ class SSH
      */
     public function authenticateKeys(string $username, string $publicKey, string $privateKey, ?string $passphrase = null)
     {
-        if (!$this->connection) {
-            throw new PluginException('[Deploy] SSH connection was not established');
-        }
-
+        if (!$this->connection) throw new PluginException('SSH connection was not established');
         $result = @ssh2_auth_pubkey_file($this->connection, $username, $publicKey, $privateKey, $passphrase);
 
         if (!$result) {
-            throw new PluginException("[Deploy] Failed to authenticate with username \"$username\" and public key on server {$this->host}:{$this->port}");
+            throw new PluginException("Failed to authenticate with username \"$username\" and public key on server {$this->host}:{$this->port}");
             return false;
         }
 
@@ -109,14 +98,11 @@ class SSH
      */
     public function authenticateAgent(string $username)
     {
-        if (!$this->connection) {
-            throw new PluginException('[Deploy] SSH connection was not established');
-        }
-
+        if (!$this->connection) throw new PluginException('SSH connection was not established');
         $result = @ssh2_auth_agent($this->connection, $username);
 
         if (!$result) {
-            throw new PluginException("[Deploy] Failed to authenticate with username \"$username\" and agent on server {$this->host}:{$this->port}");
+            throw new PluginException("Failed to authenticate with username \"$username\" and agent on server {$this->host}:{$this->port}");
             return false;
         }
 
@@ -128,10 +114,7 @@ class SSH
      */
     public function disconnect()
     {
-        if (!$this->connection) {
-            throw new PluginException('[Deploy] SSH connection was not established');
-        }
-
+        if (!$this->connection) throw new PluginException('SSH connection was not established');
         @ssh2_disconnect($this->connection);
         $this->connection = null;
     }
@@ -144,9 +127,7 @@ class SSH
      */
     public function exec(string $command, &$stdErr = null)
     {
-        if (!$this->connection) {
-            throw new PluginException('[Deploy] SSH connection was not established');
-        }
+        if (!$this->connection) throw new PluginException('SSH connection was not established');
 
         $stream = ssh2_exec($this->connection, $command);
         if (!$stream) return null;
