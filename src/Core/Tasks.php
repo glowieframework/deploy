@@ -25,20 +25,92 @@ trait Tasks
     private $__scripts = [];
 
     /**
+     * Array of exposed environment variables.
+     * @var array
+     */
+    private $__env = [];
+
+    /**
+     * Current grouped server name.
+     * @var mixed
+     */
+    private $__curServer = null;
+
+    /**
      * Runs a command in a server.
      * @param string $command Command to run.
      * @param mixed $server (Optional) Server name (or an array of server names) where to run the command. Leave empty for all.
+     * @return $this Current instance for nested calls.
      */
     public function command(string $command, $server = null)
     {
         // If server is not defined, get all names
-        if (empty($server)) $server = array_keys(Config::get('deploy.servers', []));
+        if (empty($server) && !empty($this->__curServer)) {
+            $server = $this->__curServer;
+        } else if (empty($server)) {
+            $server = array_keys(Config::get('deploy.servers', []));
+        }
 
         // Add the command to the server history
         foreach ((array)$server as $serverName) {
             if (!isset($this->__scripts[$serverName])) $this->__scripts[$serverName] = [];
             $this->__scripts[$serverName][] = $command;
         }
+
+        // Returns the current instance
+        return $this;
+    }
+
+    /**
+     * Groups a set of commands into a server.
+     * @param string|array $server (Optional) Server name (or an array of server names) where to run the command.
+     * @param callable $callback Callback with grouped command calls.
+     * @return $this Current instance for nested calls.
+     */
+    public function on($server, callable $callback)
+    {
+        if (empty($server)) throw new Exception('Server name cannot be empty on grouped commands');
+        $this->__curServer = $server;
+        call_user_func_array($callback, [&$this]);
+        $this->__curServer = null;
+        return $this;
+    }
+
+    /**
+     * Exposes an environment variable to the servers.
+     * @param string $name Variable name.
+     * @param mixed $value Variable value.
+     * @return $this Current instance for nested calls.
+     */
+    public function env(string $name, $value)
+    {
+        $this->__env[$name] = $value;
+        return $this;
+    }
+
+    /**
+     * Clears the server scripts.
+     * @param string|null $serverName (Optional) Server name to clear scripts, leave empty to clear all.
+     * @return $this Current instance for nested calls.
+     */
+    public function clearScripts(?string $serverName = null)
+    {
+        if (is_null($serverName)) {
+            $this->__scripts = [];
+        } else {
+            unset($this->__scripts[$serverName]);
+        }
+        return $this;
+    }
+
+    /**
+     * Clears the environment variables.
+     * @return $this Current instance for nested calls.
+     */
+    public function clearEnv()
+    {
+        $this->__env = [];
+        return $this;
     }
 
     /**
@@ -50,8 +122,9 @@ trait Tasks
             $this->runScriptsOnServer($scripts, $serverName);
         }
 
-        // Clear the scripts
-        $this->__scripts = [];
+        // Clear the scripts and variables
+        $this->clearScripts();
+        $this->clearEnv();
     }
 
     /**
@@ -66,7 +139,7 @@ trait Tasks
         if (empty($serverInfo)) throw new Exception("Server \"$serverName\" configuration does not exist");
 
         // Parses the scripts to a single command
-        $command = implode(' && ', $scripts);
+        $command = implode(PHP_EOL, $scripts);
 
         // Checks if the connection exists
         $connection = Connections::get($serverName);
@@ -74,6 +147,7 @@ trait Tasks
 
         // Runs the command in the connection
         if ($connection) {
+            $connection->setEnv(array_merge($serverInfo['env'] ?? [], $this->__env));
             $status = $connection->exec($command, function ($output) use ($serverName) {
                 $output = trim($output);
                 if ($output === '') return;
@@ -113,46 +187,56 @@ trait Tasks
      * Prints a message in the console.
      * @param string $message Message to print.
      * @param string $color (Optional) Message color (check Firefly CLI available colors).
+     * @return $this Current instance for nested calls.
      */
     public function print(string $message, string $color = 'default')
     {
         Firefly::print(Firefly::color($message, $color));
+        return $this;
     }
 
     /**
      * Prints an error message in the console.
      * @param string $message Message to print.
+     * @return $this Current instance for nested calls.
      */
     public function error(string $message)
     {
         $this->print($message, 'red');
+        return $this;
     }
 
     /**
      * Prints a warning message in the console.
      * @param string $message Message to print.
+     * @return $this Current instance for nested calls.
      */
     public function warning(string $message)
     {
         $this->print($message, 'yellow');
+        return $this;
     }
 
     /**
      * Prints a success message in the console.
      * @param string $message Message to print.
+     * @return $this Current instance for nested calls.
      */
     public function success(string $message)
     {
         $this->print($message, 'green');
+        return $this;
     }
 
     /**
      * Prints an info message in the console.
      * @param string $message Message to print.
+     * @return $this Current instance for nested calls.
      */
     public function info(string $message)
     {
         $this->print($message, 'cyan');
+        return $this;
     }
 
     /**

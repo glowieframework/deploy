@@ -54,19 +54,16 @@ class Connections
         $connection = self::get($serverName);
         if ($connection) return $connection;
 
-        // Creates the connection if not exists
-        if (empty($connection)) {
-            // Checks if its a local connection
-            if (!empty($serverInfo['local'])) {
-                self::set($serverName, new Local());
-                return self::get($serverName);
-            }
-
-            // Validate SSH infos and connect to the server
-            if (empty($serverInfo['host'])) throw new Exception("Missing host for server $serverName");
-            $connection = new SSH($serverInfo['host'], $serverInfo['user'] ?? 'root', $serverInfo['port'] ?? 22);
-            self::set($serverName, $connection);
+        // Checks if its a local connection
+        if (!empty($serverInfo['local'])) {
+            self::set($serverName, new Local());
+            return self::get($serverName);
         }
+
+        // Validate SSH infos and connect to the server
+        if (empty($serverInfo['host'])) throw new Exception("Missing host for server $serverName");
+        $connection = new SSH($serverInfo['host'], $serverInfo['user'] ?? 'root', $serverInfo['port'] ?? 22);
+        self::set($serverName, $connection);
 
         // Returns the connection instance
         return self::get($serverName);

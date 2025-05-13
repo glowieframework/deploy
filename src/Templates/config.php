@@ -20,13 +20,15 @@ return [
         'servers' => [
 
             'localhost' => [
-                'local' => true
+                'local' => true,
+                'env' => []
             ],
 
             'web' => [
                 'host' => Env::get('DEPLOY_SSH_HOST'),
                 'port' => Env::get('DEPLOY_SSH_PORT', 22),
-                'user' => Env::get('DEPLOY_SSH_USER', 'root')
+                'user' => Env::get('DEPLOY_SSH_USER', 'root'),
+                'env' => []
             ]
         ],
 
