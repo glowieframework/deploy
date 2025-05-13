@@ -13,34 +13,22 @@ namespace Glowie\Plugins\Deploy\Core;
  */
 class Local
 {
-
     /**
      * Executes a command locally.
-     * @param string $command Command to run.
-     * @param string|null &$stdErr Variable to store the errors, if any.
-     * @return mixed Returns the command output.
+     * @param string $command Command to execute.
+     * @param callable $callback Callback of the realtime result, receives the output as a parameter.
+     * @return int Returns the process exit code.
      */
-    public function exec(string $command, &$stdErr = null)
+    public function exec(string $command, callable $callback)
     {
-        $output = [];
-        $code = 0;
-
-        exec($command . ' 2>&1', $output, $code);
-
-        if ($code !== 0) {
-            $stdErr = implode(PHP_EOL, $output);
-            return null;
+        // Wraps the shell command
+        if (stripos(PHP_OS, 'WIN') === 0) {
+            $command = 'cmd /c ' . escapeshellarg($command);
+        } else {
+            $command = 'bash -c ' . escapeshellarg($command);
         }
 
-        $stdErr = null;
-        return implode(PHP_EOL, $output);
-    }
-
-    /**
-     * Fake a disconnect method for compatibility.
-     */
-    public function disconnect()
-    {
-        return true;
+        // Execute the command
+        return Process::openShell($command, $callback);
     }
 }

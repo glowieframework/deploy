@@ -26,9 +26,7 @@ return [
             'web' => [
                 'host' => Env::get('DEPLOY_SSH_HOST'),
                 'port' => Env::get('DEPLOY_SSH_PORT', 22),
-                'auth' => Env::get('DEPLOY_SSH_AUTH', 'password'),
-                'username' => Env::get('DEPLOY_SSH_USER', 'root'),
-                'password' => Env::get('DEPLOY_SSH_PASSWORD'),
+                'user' => Env::get('DEPLOY_SSH_USER', 'root')
             ]
         ],
 

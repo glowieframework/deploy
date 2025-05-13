@@ -2,7 +2,7 @@
 
 namespace Glowie\Plugins\Deploy\Core;
 
-use Glowie\Core\Exception\PluginException;
+use Exception;
 
 /**
  * Deploy connections handler.
@@ -62,39 +62,10 @@ class Connections
                 return self::get($serverName);
             }
 
-            // Validate infos
-            if (empty($serverInfo['host'])) throw new PluginException("Missing host for server $serverName");
-            if (empty($serverInfo['username'])) throw new PluginException("Missing username for server $serverName");
-
-            // Connect to the server
-            $connection = new SSH($serverInfo['host'], $serverInfo['port'] ?? 22);
-
-            // Checks for authentication method
-            if (!empty($serverInfo['auth']) && $serverInfo['auth'] === 'password') {
-                // Validate info
-                if (empty($serverInfo['password'])) throw new PluginException("Missing password for server $serverName");
-
-                // Authenticate with password
-                if ($connection->authenticate($serverInfo['username'], $serverInfo['password'])) {
-                    self::set($serverName, $connection);
-                }
-            } else if ($serverInfo['auth'] === 'public_key') {
-                // Validate infos
-                if (empty($serverInfo['public_key'])) throw new PluginException("Missing public key file for server $serverName");
-                if (empty($serverInfo['private_key'])) throw new PluginException("Missing private key file for server $serverName");
-
-                // Authenticate with key pair
-                if ($connection->authenticateKeys($serverInfo['username'], $serverInfo['public_key'], $serverInfo['private_key'], $serverInfo['passphrase'] ?? null)) {
-                    self::set($serverName, $connection);
-                }
-            } else if ($serverInfo['auth'] === 'agent') {
-                // Authenticate with ssh agent
-                if ($connection->authenticateAgent($serverInfo['username'])) {
-                    self::set($serverName, $connection);
-                }
-            } else {
-                self::set($serverName, $connection);
-            }
+            // Validate SSH infos and connect to the server
+            if (empty($serverInfo['host'])) throw new Exception("Missing host for server $serverName");
+            $connection = new SSH($serverInfo['host'], $serverInfo['user'] ?? 'root', $serverInfo['port'] ?? 22);
+            self::set($serverName, $connection);
         }
 
         // Returns the connection instance
@@ -107,8 +78,6 @@ class Connections
      */
     public static function disconnect(string $serverName)
     {
-        $connection = self::get($serverName);
-        if ($connection) $connection->disconnect();
         unset(self::$connections[$serverName]);
     }
 
@@ -117,9 +86,6 @@ class Connections
      */
     public static function disconnectAll()
     {
-        foreach (self::$connections as $serverName => $connection) {
-            if ($connection) $connection->disconnect();
-            unset(self::$connections[$serverName]);
-        }
+        self::$connections = [];
     }
 }

@@ -3,7 +3,6 @@
 namespace Glowie\Plugins\Deploy\Commands;
 
 use Glowie\Core\CLI\Command;
-use Glowie\Core\Exception\PluginException;
 use Glowie\Plugins\Deploy\Core\Connections;
 
 /**
@@ -54,8 +53,10 @@ class Run extends Command
 
             // On success, calls the success method if exists
             if (is_callable([$tasks, 'success'])) $tasks->success($task);
+            $this->success("[Deploy] Task \"$task\" finished successfully");
         } else {
-            throw new PluginException("[Deploy] Task \"$task\" does not exist in the tasks file");
+            $this->fail("[Deploy] Task \"$task\" does not exist in the tasks file");
+            exit(127);
         }
 
         // End all connections

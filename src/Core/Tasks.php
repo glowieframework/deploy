@@ -3,8 +3,8 @@
 namespace Glowie\Plugins\Deploy\Core;
 
 use Config;
+use Exception;
 use Glowie\Core\CLI\Firefly;
-use Glowie\Core\Exception\PluginException;
 
 /**
  * Base trait to deploy tasks file.
@@ -63,7 +63,7 @@ trait Tasks
     {
         // Checks if the server config exists
         $serverInfo = Config::get("deploy.servers.$serverName");
-        if (empty($serverInfo)) throw new PluginException("Server \"$serverName\" configuration does not exist");
+        if (empty($serverInfo)) throw new Exception("Server \"$serverName\" configuration does not exist");
 
         // Parses the scripts to a single command
         $command = implode(' && ', $scripts);
@@ -74,24 +74,17 @@ trait Tasks
 
         // Runs the command in the connection
         if ($connection) {
-            $this->print("[$serverName] => $command", 'magenta');
-
-            $error = null;
-            $output = $connection->exec($command, $error);
-
-            if ($error) {
-                foreach (explode(PHP_EOL, $error) as $line) {
-                    $line = trim($line);
-                    if ($line !== '') $this->print("    >> $line", 'red');
+            $status = $connection->exec($command, function ($output) use ($serverName) {
+                $output = trim($output);
+                if ($output === '') return;
+                $output = explode(PHP_EOL, $output);
+                foreach ($output as $line) {
+                    $this->print(Firefly::color("[$serverName]", 'magenta') . " $line");
                 }
+            });
 
-                throw new PluginException("Command \"$command\" failed on server \"$serverName\"");
-            } else if (!empty($output)) {
-                foreach (explode(PHP_EOL, $output) as $line) {
-                    $line = trim($line);
-                    if ($line !== '') $this->print("    >> $line", 'yellow');
-                }
-            }
+            // Handle exit error code
+            if ($status !== 0) throw new Exception("Command failed on server \"$serverName\" with exit code $status", $status);
         }
     }
 
