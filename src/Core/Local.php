@@ -30,26 +30,40 @@ class Local
 
     /**
      * Executes a command locally.
-     * @param string $command Command to execute.
+     * @param array $command Array of commands to execute.
      * @param callable $callback Callback of the realtime result, receives the output as a parameter.
      * @return int Returns the process exit code.
      */
-    public function exec(string $command, callable $callback)
+    public function exec(array $command, callable $callback)
     {
+        // Gets the current platform
+        $isWindows = PHP_OS_FAMILY === 'Windows';
+
         // Parses the environment variables
         $env = [];
         foreach ($this->env as $key => $value) {
             if ($value === false) continue;
-            $env[] = 'export ' . $key . '="' . $value . '"';
+            if ($isWindows) {
+                $env[] = "set \"$key=$value\"";
+            } else {
+                $value = addslashes($value);
+                $env[] = "export $key=\"$value\"";
+            }
         }
 
         // Wraps the shell command into heredoc
-        $delimiter = 'EOF-GLOWIE-DEPLOY';
-        $command = "bash -se << \\$delimiter" . PHP_EOL .
-            (!empty($env) ? implode(PHP_EOL, $env) . PHP_EOL : '') .
-            'set -e' . PHP_EOL .
-            $command . PHP_EOL .
-            $delimiter;
+        if ($isWindows) {
+            $command = 'cmd /C "' .
+                (!empty($env) ? implode(' && ', $env) . ' && ' : '') .
+                implode(' && ', $command) . '"';
+        } else {
+            $delimiter = 'EOF-GLOWIE-DEPLOY';
+            $command = "bash -se << \\$delimiter" . PHP_EOL .
+                (!empty($env) ? implode(PHP_EOL, $env) . PHP_EOL : '') .
+                'set -e' . PHP_EOL .
+                implode(PHP_EOL, $command) . PHP_EOL .
+                $delimiter;
+        }
 
         // Execute the command
         return Process::openShell($command, $callback);

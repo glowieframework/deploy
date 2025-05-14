@@ -138,17 +138,14 @@ trait Tasks
         $serverInfo = Config::get("deploy.servers.$serverName");
         if (empty($serverInfo)) throw new Exception("Server \"$serverName\" configuration does not exist");
 
-        // Parses the scripts to a single command
-        $command = implode(PHP_EOL, $scripts);
-
         // Checks if the connection exists
         $connection = Connections::get($serverName);
         if (!$connection) $connection = Connections::connect($serverName, $serverInfo);
 
-        // Runs the command in the connection
+        // Runs the commands in the connection
         if ($connection) {
             $connection->setEnv(array_merge($serverInfo['env'] ?? [], $this->__env));
-            $status = $connection->exec($command, function ($output) use ($serverName) {
+            $status = $connection->exec($scripts, function ($output) use ($serverName) {
                 $output = trim($output);
                 if ($output === '') return;
                 $output = explode(PHP_EOL, $output);

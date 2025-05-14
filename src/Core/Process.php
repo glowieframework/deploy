@@ -19,13 +19,12 @@ class Process
      * Opens a process shell and executes a command.
      * @param string $command Command to be executed.
      * @param callable $callback Callback of the realtime result, receives the output as a parameter.
+     * @param string|null $input (Optional) Optional input string to send to the shell after opening.
      * @return int Returns the process exit code.
      */
-    public static function openShell(string $command, callable $callback)
+    public static function openShell(string $command, callable $callback, ?string $input = null)
     {
         $pipes = [];
-        $process = null;
-
         $descriptorspec = [
             0 => ["pipe", "r"],
             1 => ["pipe", "w"],
@@ -36,25 +35,25 @@ class Process
 
         if (!is_resource($process)) throw new PluginException('Failed to start process');
 
+        if (!is_null($input)) {
+            fwrite($pipes[0], $input);
+            fclose($pipes[0]);
+        } else {
+            fclose($pipes[0]);
+        }
+
         stream_set_blocking($pipes[1], false);
         stream_set_blocking($pipes[2], false);
-
-        fclose($pipes[0]);
 
         while (!feof($pipes[1]) || !feof($pipes[2])) {
             $read = [$pipes[1], $pipes[2]];
             $write = $except = null;
-
             stream_select($read, $write, $except, 0, 200000);
 
             foreach ($read as $stream) {
                 $output = fread($stream, 4096);
                 if ($output === false || $output === '') continue;
-                if ($stream === $pipes[1]) {
-                    call_user_func($callback, $output);
-                } elseif ($stream === $pipes[2]) {
-                    call_user_func($callback, $output);
-                }
+                call_user_func($callback, $output);
             }
         }
 
@@ -64,7 +63,6 @@ class Process
 
         $status = proc_get_status($process);
         $exitCode = $status['exitcode'] ?? 0;
-
         proc_close($process);
 
         return $exitCode;
