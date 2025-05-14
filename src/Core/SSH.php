@@ -85,14 +85,15 @@ class SSH
         // Checks for the platform
         if ($isWindows) {
             // Wraps the shell command to the shell input
-            $input = (!empty($env) ? implode(PHP_EOL, $env) . PHP_EOL : '') .
+            $input = 'bash -se' . PHP_EOL .
+                (!empty($env) ? implode(PHP_EOL, $env) . PHP_EOL : '') .
                 'set -e' . PHP_EOL .
-                str_replace("\r", '', $command);
+                $command;
 
             $command = "cmd /C \"$ssh\"";
 
             // Execute the command with the input
-            return Process::openShell($command, $callback, $input);
+            return Process::openShell($command, $callback, str_replace("\r", '', $input));
         } else {
             // Wraps the shell command into heredoc with SSH
             $command = "$ssh 'bash -se' << \\$delimiter" . PHP_EOL .
