@@ -92,6 +92,7 @@ class CLI
 
     /**
      * Loads the configuration file from the project or sets the minimum default config.
+     * @return void
      */
     private static function loadConfig()
     {
@@ -100,22 +101,29 @@ class CLI
         Config::set('error_reporting.logging', false);
         Config::set('deploy.servers.localhost.local', true);
 
-        // Checks if a config file path was passed
-        if (!empty(self::$args['config'])) {
-            $file = self::$args['config'];
-            if (!is_file($file)) throw new FileException('Config file "' . $file . '" was not found');
+        // Checks if a config arg was passed
+        if (!empty(self::$args['config'])) return self::loadConfigFromFile(self::$args['config']);
 
-            $config = require_once($file);
-            foreach ($config as $key => $value) {
-                Config::set($key, $value);
-            }
-
-            return;
-        }
-
-        // Checks if the project has a config file and loads it
+        // Checks if the Glowie project has a config file and loads it
         $file = Util::location('config/Config.php');
-        if (is_file($file)) Config::load();
+        if (is_file($file)) return Config::load();
+
+        // Checks if the current folder has a config file and loads it
+        $file = rtrim(getcwd(), '/') . '/config.php';
+        return self::loadConfigFromFile($file);
+    }
+
+    /**
+     * Loads the configuration from a file.
+     * @param string $file Filename to load.
+     */
+    private static function loadConfigFromFile(string $file)
+    {
+        if (!is_file($file)) throw new FileException('Config file "' . $file . '" was not found');
+        $config = require_once($file);
+        foreach ($config as $key => $value) {
+            Config::set($key, $value);
+        }
     }
 
     /**

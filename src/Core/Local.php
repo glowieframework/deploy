@@ -42,26 +42,26 @@ class Local
         // Parses the environment variables
         $env = [];
         foreach ($this->env as $key => $value) {
-            if ($value === false) continue;
             if ($isWindows) {
-                $env[] = "set \"$key=$value\"";
+                $env[] = sprintf('set "%s=%s"', $key, str_replace('"', '^"', $value));
             } else {
-                $value = addslashes($value);
-                $env[] = "export $key=\"$value\"";
+                $env[] = sprintf('export %s=%s', $key, escapeshellarg($value));
             }
         }
 
         // Wraps the shell command into heredoc
         if ($isWindows) {
-            $command = 'cmd /C "' .
-                (!empty($env) ? implode(' && ', $env) . ' && ' : '') .
-                implode(' && ', $command) . '"';
+            $env = !empty($env) ? (implode(' && ', $env) . ' && ') : '';
+            $command = implode(' && ', $command);
+            $command = sprintf('cmd /C "%s %s"', $env, str_replace('"', '^"', $command));
         } else {
+            $env = !empty($env) ? (implode("\n", $env) . "\n") : '';
             $delimiter = 'EOF-GLOWIE-DEPLOY';
-            $command = "bash -se << \\$delimiter" . PHP_EOL .
-                (!empty($env) ? implode(PHP_EOL, $env) . PHP_EOL : '') .
-                'set -e' . PHP_EOL .
-                implode(PHP_EOL, $command) . PHP_EOL .
+            $command = implode("\n", $command);
+            $command = "bash -se << \\$delimiter\n" .
+                $env .
+                "set -e\n" .
+                "$command\n" .
                 $delimiter;
         }
 

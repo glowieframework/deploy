@@ -118,6 +118,7 @@ trait Tasks
      */
     public function processCommands()
     {
+        // Run the scripts for each server
         foreach ($this->__scripts as $serverName => $scripts) {
             $this->runScriptsOnServer($scripts, $serverName);
         }
@@ -144,12 +145,17 @@ trait Tasks
 
         // Runs the commands in the connection
         if ($connection) {
+            // Sets the environment variables
             $connection->setEnv(array_merge($serverInfo['env'] ?? [], $this->__env));
+
+            // Executes the commands
             $status = $connection->exec($scripts, function ($output) use ($serverName) {
+                // Checks for empty outputs
                 $output = trim($output);
                 if ($output === '') return;
-                $output = explode(PHP_EOL, $output);
-                foreach ($output as $line) {
+
+                // Prints the output line by line
+                foreach (explode(PHP_EOL, $output) as $line) {
                     $this->print(Firefly::color("[$serverName]", 'magenta') . " $line");
                 }
             });

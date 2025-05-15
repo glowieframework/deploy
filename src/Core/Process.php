@@ -24,6 +24,7 @@ class Process
      */
     public static function openShell(string $command, callable $callback, ?string $input = null)
     {
+        // Defines the pipes
         $pipes = [];
         $descriptorspec = [
             0 => ["pipe", "r"],
@@ -31,10 +32,11 @@ class Process
             2 => ["pipe", "w"],
         ];
 
+        // Creates the process resource
         $process = proc_open($command, $descriptorspec, $pipes);
-
         if (!is_resource($process)) throw new PluginException('Failed to start process');
 
+        // Writes to the input if any
         if (!is_null($input)) {
             fwrite($pipes[0], $input);
             fclose($pipes[0]);
@@ -42,9 +44,11 @@ class Process
             fclose($pipes[0]);
         }
 
+        // Sets the read pipes as non-blocking
         stream_set_blocking($pipes[1], false);
         stream_set_blocking($pipes[2], false);
 
+        // Reads the output line by line and send to the callback
         while (!feof($pipes[1]) || !feof($pipes[2])) {
             $read = [$pipes[1], $pipes[2]];
             $write = $except = null;
@@ -57,14 +61,15 @@ class Process
             }
         }
 
+        // Closes the pipes
         foreach ($pipes as $pipe) {
             if (is_resource($pipe)) fclose($pipe);
         }
 
+        // Gets and returns the exit code
         $status = proc_get_status($process);
         $exitCode = $status['exitcode'] ?? 0;
         proc_close($process);
-
         return $exitCode;
     }
 }

@@ -74,32 +74,37 @@ class SSH
         $env = [];
         foreach ($this->env as $key => $value) {
             if ($value === false) continue;
-            $env[] = 'export ' . $key . '="' . $value . '"';
+            $env[] = sprintf('export %s=%s', $key, escapeshellarg($value));
         }
 
+        // Concats the env string
+        $env = !empty($env) ? (implode("\n", $env) . "\n") : '';
+
         // Defines the SSH connection command
-        $delimiter = 'EOF-GLOWIE-DEPLOY';
         $ssh = "ssh -t -o StrictHostKeyChecking=no -o LogLevel=ERROR -p {$this->port} {$this->username}@{$this->host}";
-        $command = implode(PHP_EOL, $command);
+        $command = implode("\n", $command);
 
         // Checks for the platform
         if ($isWindows) {
-            // Wraps the shell command to the shell input
-            $input = 'bash -se' . PHP_EOL .
-                (!empty($env) ? implode(PHP_EOL, $env) . PHP_EOL : '') .
-                'set -e' . PHP_EOL .
+            // Wraps the command to the shell input
+            $input = "bash -se\n" .
+                $env .
+                "set -e\n" .
                 $command;
 
+            // Creates the opening command
+            $ssh = str_replace('"', '^"', $ssh);
             $command = "cmd /C \"$ssh\"";
 
             // Execute the command with the input
             return Process::openShell($command, $callback, str_replace("\r", '', $input));
         } else {
             // Wraps the shell command into heredoc with SSH
-            $command = "$ssh 'bash -se' << \\$delimiter" . PHP_EOL .
-                (!empty($env) ? implode(PHP_EOL, $env) . PHP_EOL : '') .
-                'set -e' . PHP_EOL .
-                $command . PHP_EOL .
+            $delimiter = 'EOF-GLOWIE-DEPLOY';
+            $command = "$ssh 'bash -se' << \\$delimiter\n" .
+                $env .
+                "set -e\n" .
+                $command . "\n" .
                 $delimiter;
 
             // Execute the command
