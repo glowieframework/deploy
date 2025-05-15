@@ -42,7 +42,7 @@ trait Tasks
      * @param mixed $server (Optional) Server name (or an array of server names) where to run the command. Leave empty for all.
      * @return $this Current instance for nested calls.
      */
-    public function command(string $command, $server = null)
+    final public function command(string $command, $server = null)
     {
         // If server is not defined, get all names
         if (empty($server) && !empty($this->__curServer)) {
@@ -67,7 +67,7 @@ trait Tasks
      * @param callable $callback Callback with grouped command calls.
      * @return $this Current instance for nested calls.
      */
-    public function on($server, callable $callback)
+    final public function on($server, callable $callback)
     {
         if (empty($server)) throw new Exception('Server name cannot be empty on grouped commands');
         $this->__curServer = $server;
@@ -82,7 +82,7 @@ trait Tasks
      * @param mixed $value Variable value.
      * @return $this Current instance for nested calls.
      */
-    public function env(string $name, $value)
+    final public function env(string $name, $value)
     {
         $this->__env[$name] = $value;
         return $this;
@@ -93,7 +93,7 @@ trait Tasks
      * @param string|null $serverName (Optional) Server name to clear scripts, leave empty to clear all.
      * @return $this Current instance for nested calls.
      */
-    public function clearScripts(?string $serverName = null)
+    final public function clearScripts(?string $serverName = null)
     {
         if (is_null($serverName)) {
             $this->__scripts = [];
@@ -107,7 +107,7 @@ trait Tasks
      * Clears the environment variables.
      * @return $this Current instance for nested calls.
      */
-    public function clearEnv()
+    final public function clearEnv()
     {
         $this->__env = [];
         return $this;
@@ -116,11 +116,11 @@ trait Tasks
     /**
      * Processes the commands at once.
      */
-    public function processCommands()
+    final public function __processCommands()
     {
         // Run the scripts for each server
         foreach ($this->__scripts as $serverName => $scripts) {
-            $this->runScriptsOnServer($scripts, $serverName);
+            $this->__runScriptsOnServer($scripts, $serverName);
         }
 
         // Clear the scripts and variables
@@ -133,7 +133,7 @@ trait Tasks
      * @param array $scripts Array of scripts.
      * @param string $serverName Name of the server.
      */
-    private function runScriptsOnServer(array $scripts, string $serverName)
+    final function __runScriptsOnServer(array $scripts, string $serverName)
     {
         // Checks if the server config exists
         $serverInfo = Config::get("deploy.servers.$serverName");
@@ -171,7 +171,7 @@ trait Tasks
      * @param mixed $default (Optional) Default value to return if the key does not exist.
      * @return mixed Returns the value if exists or the default if not.
      */
-    public function getArg(string $arg, $default = null)
+    final public function getArg(string $arg, $default = null)
     {
         return Firefly::getArg($arg, $default);
     }
@@ -181,7 +181,7 @@ trait Tasks
      * @param string $key Option key to get.
      * @return bool Returns true if the option exists, false otherwise.
      */
-    public function hasOption(string $key)
+    final public function hasOption(string $key)
     {
         return $this->getArg($key) === '';
     }
@@ -192,7 +192,7 @@ trait Tasks
      * @param string $color (Optional) Message color (check Firefly CLI available colors).
      * @return $this Current instance for nested calls.
      */
-    public function print(string $message, string $color = 'default')
+    final public function print(string $message, string $color = 'default')
     {
         Firefly::print(Firefly::color($message, $color));
         return $this;
@@ -203,7 +203,7 @@ trait Tasks
      * @param string $message Message to print.
      * @return $this Current instance for nested calls.
      */
-    public function error(string $message)
+    final public function error(string $message)
     {
         $this->print($message, 'red');
         return $this;
@@ -214,7 +214,7 @@ trait Tasks
      * @param string $message Message to print.
      * @return $this Current instance for nested calls.
      */
-    public function warning(string $message)
+    final public function warning(string $message)
     {
         $this->print($message, 'yellow');
         return $this;
@@ -225,7 +225,7 @@ trait Tasks
      * @param string $message Message to print.
      * @return $this Current instance for nested calls.
      */
-    public function success(string $message)
+    final public function success(string $message)
     {
         $this->print($message, 'green');
         return $this;
@@ -236,7 +236,7 @@ trait Tasks
      * @param string $message Message to print.
      * @return $this Current instance for nested calls.
      */
-    public function info(string $message)
+    final public function info(string $message)
     {
         $this->print($message, 'cyan');
         return $this;
@@ -250,7 +250,7 @@ trait Tasks
      * @param string|null $chatId (Optional) Custom chat ID to send the notification. Leave empty to use from your deploy config file.
      * @return bool Returns true on success, false otherwise.
      */
-    public function notifyTelegram(string $message, array $options = [], ?string $botId = null, ?string $chatId = null)
+    final public function notifyTelegram(string $message, array $options = [], ?string $botId = null, ?string $chatId = null)
     {
         return Notify::telegram($message, $options, $botId, $chatId);
     }
@@ -262,7 +262,7 @@ trait Tasks
      * @param string|null $webhookUrl (Optional) Custom webhook URL to send the notification. Leave empty to use from your deploy config file.
      * @return bool Returns true on success, false otherwise.
      */
-    public function notifyDiscord(string $message, array $options = [], ?string $webhookUrl = null)
+    final public function notifyDiscord(string $message, array $options = [], ?string $webhookUrl = null)
     {
         return Notify::discord($message, $options, $webhookUrl);
     }
@@ -274,7 +274,7 @@ trait Tasks
      * @param string|null $accountKey (Optional) Custom account key to send the notification. Leave empty to use from your deploy config file.
      * @return bool Returns true on success, false otherwise.
      */
-    public function notifyPush(string $message, array $options = [], ?string $accountKey = null)
+    final public function notifyPush(string $message, array $options = [], ?string $accountKey = null)
     {
         return Notify::push($message, $options, $accountKey);
     }
@@ -286,7 +286,7 @@ trait Tasks
      * @param string|null $webhookUrl (Optional) Custom webhook URL to send the notification. Leave empty to use from your deploy config file.
      * @return bool Returns true on success, false otherwise.
      */
-    public function notifySlack(string $message, array $options = [], ?string $webhookUrl = null)
+    final public function notifySlack(string $message, array $options = [], ?string $webhookUrl = null)
     {
         return Notify::slack($message, $options, $webhookUrl);
     }

@@ -43,7 +43,7 @@ class Run extends Command
             try {
                 // Calls the task
                 $tasks->{$task}();
-                $tasks->processCommands();
+                $tasks->__processCommands();
             } catch (\Throwable $th) {
                 // On failure, calls the fail method if exists
                 if (is_callable([$tasks, 'fail'])) $tasks->fail($task, $th);
@@ -51,8 +51,8 @@ class Run extends Command
                 exit($th->getCode() ? $th->getCode() : 127);
             }
 
-            // On success, calls the success method if exists
-            if (is_callable([$tasks, 'success'])) $tasks->success($task);
+            // On success, calls the done method if exists
+            if (is_callable([$tasks, 'done'])) $tasks->done($task);
             $this->success("[Deploy] Task \"$task\" finished successfully");
         } else {
             $this->fail("[Deploy] Task \"$task\" does not exist in the tasks file");

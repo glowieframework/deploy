@@ -2,11 +2,9 @@
 
 This is a plugin for [Glowie Framework](https://github.com/glowieframework/glowie) that allows deploying applications using automated SSH scripts. It supports notifications, tasks, and environment variables.
 
-## Requirements
-
-**This plugin requires the `ssh2` PHP extension.**
-
 ## Installation
+
+### In a Glowie project
 
 Install in your Glowie project using Composer:
 
@@ -53,15 +51,15 @@ Under the `servers` key, you can define an associative array of all servers that
 'servers' => [
 
     'localhost' => [
-        'local' => true // Marks this server as local deployment (no SSH)
+        'local' => true, // Marks this server as local deployment (no SSH)
+        'env' => [] // (Optional) Associative array of environment variables to expose to the server
     ],
 
     'web' => [
-        'host' => Env::get('DEPLOY_SSH_HOST'), // SSH host name or IP address
+        'host' => Env::get('DEPLOY_SSH_HOST'), // SSH hostname or IP address
         'port' => Env::get('DEPLOY_SSH_PORT', 22), // SSH port (defaults to 22)
-        'auth' => Env::get('DEPLOY_SSH_AUTH', 'password'), // Authentication method, either 'password' or 'key'.
-        'username' => Env::get('DEPLOY_SSH_USER', 'root'), // SSH user name
-        'password' => Env::get('DEPLOY_SSH_PASSWORD'), // SSH password (if using password authentication)
+        'user' => Env::get('DEPLOY_SSH_USER', 'root'), // SSH user name
+        'env' => [] // (Optional) Associative array of environment variables to expose to the server
     ],
 
     // ... other servers can go here
@@ -107,6 +105,15 @@ $this->command('cd /var/www/my-project', 'homologation');
 $this->command('git pull', ['homologation', 'production']);
 ```
 
+You can also enclose a set of commands to run on a specific server (or an array of servers) by using the following syntax:
+
+```php
+$this->on('production', function() {
+    $this->command('cd /var/www/production-folder');
+    $this->command('git pull');
+});
+```
+
 ### Printing messages in the console
 
 To print a custom message in the console, use:
@@ -127,12 +134,25 @@ $this->warning('Be careful...');
 $this->info('Running build...');
 ```
 
+### Before initialization
+
+If you want to perform an action before your task runs, define the following method in your task file:
+
+```php
+public function init(string $task){
+    // You can do anything here
+    $this->info("Starting $task...");
+}
+```
+
+The method will receive the task name as the first parameter.
+
 ### After success
 
 If you want to do something when your task ends the execution with success (no command returned a code greater than `0`), create the following method in the tasks file:
 
 ```php
-public function success(string $task){
+public function done(string $task){
     // You can do anything here
     $this->success("$task ran successfully!");
 }
@@ -154,6 +174,16 @@ public function fail(string $task, Throwable $th){
 
 The method will receive the task name as the first parameter, and the exception as the second. This method is called for errors in any task from the tasks file.
 
+## Setting environment variables
+
+You can expose environment variables to the target servers using the `env()` method. This method allows you to add or override environment variables defined in the config file.
+
+```php
+$this->env('custom_env', 'custom_value');
+```
+
+> [!NOTE] Environment variables exposed using this method are shared across all servers.
+
 ## Running a deploy task
 
 Open the terminal in the root of your application and run:
@@ -172,6 +202,12 @@ Alternatively, you can also specify the target tasks file, if you are not using 
 
 ```shell
 php firefly deploy:run --path=/path/to/.deploy-tasks.php
+```
+
+You can also specify a custom config file if you're not using the default one:
+
+```shell
+php firefly deploy:run --config=/path/to/config.php
 ```
 
 ### Passing CLI arguments and options

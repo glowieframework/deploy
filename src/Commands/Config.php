@@ -24,7 +24,7 @@ class Config extends Command
     public function run()
     {
         // Sets the default config path
-        if (file_exists(Util::location('config'))) {
+        if (is_dir(Util::location('config'))) {
             $defaultPath = Util::location('config/Deploy.php');
         } else {
             $defaultPath = rtrim(getcwd(), '/') . '/config.php';

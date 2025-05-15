@@ -34,7 +34,7 @@ return new class {
      * This method runs when any task finishes successfully.
      * @param string $task Receives the task name.
      */
-    public function success(string $task)
+    public function done(string $task)
     {
         //
     }
