@@ -32,14 +32,15 @@ class Update extends Command
         $curVersion = self::getCurrentVersion();
         $lastVersion = self::getLastVersion();
         if (empty($curVersion) || empty($lastVersion)) return $this->unableToUpdate();
-        if ($curVersion !== $lastVersion) return $this->performUpdate();
-        $this->success('[Deploy] Your version is up to date.');
+        if ($curVersion !== $lastVersion) return $this->performUpdate($lastVersion);
+        $this->success("[Deploy] Your version ($curVersion) is up to date");
     }
 
     /**
      * Performs the binary update.
+     * @param string $newVersion New version.
      */
-    private function performUpdate()
+    private function performUpdate(string $newVersion)
     {
         // Checks if the bin location is writable
         $path = Phar::running(false);
@@ -51,7 +52,7 @@ class Update extends Command
 
         // Updates the file
         file_put_contents($path, $data->body);
-        $this->success('[Deploy] Updated successfully.');
+        $this->success("[Deploy] Updated successfully to version $newVersion");
     }
 
     /**
@@ -59,7 +60,7 @@ class Update extends Command
      */
     private function unableToUpdate()
     {
-        $this->fail('[Deploy] Unable to update. Please download the last version manually from our website.');
+        $this->fail('[Deploy] Unable to update. Please download the last version manually from our website');
         exit(127);
     }
 

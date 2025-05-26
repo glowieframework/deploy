@@ -54,12 +54,18 @@ class CLI
         // Load environment configuration
         Env::load();
 
+        // Checks for updates
+        $curVersion = Update::getCurrentVersion();
+        $lastVersion = Update::getLastVersion();
+        if (!empty($curVersion) && !empty($lastVersion) && $curVersion !== $lastVersion) {
+            Firefly::print(Firefly::color("[Deploy] A new version ($lastVersion) is available. Update using \"deploy update\"", 'cyan'));
+        }
+
         // Gets the command
         array_shift(self::$args);
         if (!isset(self::$args[0])) {
-            $version = Update::getCurrentVersion();
-            Firefly::print(Firefly::color('Glowie Deploy | Standalone mode | Version ' . $version, 'magenta'));
-            Firefly::print(Firefly::color('Usage: deploy run [options]', 'yellow'));
+            Firefly::print(Firefly::color('[Deploy] Glowie Deploy | Standalone mode | Version ' . $curVersion, 'magenta'));
+            Firefly::print(Firefly::color('[Deploy] Usage: "deploy run [options]"', 'yellow'));
             return;
         }
 
@@ -110,7 +116,7 @@ class CLI
 
         // Checks if the current folder has a config file and loads it
         $file = rtrim(getcwd(), '/') . '/config.php';
-        return self::loadConfigFromFile($file);
+        if (is_file($file)) return self::loadConfigFromFile($file);
     }
 
     /**
@@ -119,7 +125,7 @@ class CLI
      */
     private static function loadConfigFromFile(string $file)
     {
-        if (!is_file($file)) throw new FileException('Config file "' . $file . '" was not found');
+        if (!is_file($file)) throw new FileException('[Deploy] Config file "' . $file . '" was not found');
         $config = require_once($file);
         foreach ($config as $key => $value) {
             Config::set($key, $value);
@@ -142,7 +148,7 @@ class CLI
             // Args with values
             if (preg_match('/^--([^=]+)=(.+)$/', $value, $match)) {
                 $args[mb_strtolower($match[1])] = $match[2];
-            } else if (preg_match('/^--([^=]+)$/', $value, $match)) {
+            } else if (preg_match('/^-{1,2}([^=]+)$/', $value, $match)) {
                 // Args without values
                 $args[mb_strtolower($match[1])] = '';
             }
