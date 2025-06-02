@@ -62,6 +62,57 @@ trait Tasks
     }
 
     /**
+     * Runs a task.
+     * @param string $task Task name.
+     */
+    final public function task(string $task)
+    {
+        // Checks if the task exists
+        if (!is_callable([$this, $task])) throw new Exception("Task \"$task\" does not exist in the tasks file");
+
+        try {
+            // Calls the init for this task
+            if (is_callable([$this, 'init'])) $this->init($task);
+
+            // Calls the task
+            $this->{$task}();
+            $this->__processCommands();
+
+            // Calls the done method for this task
+            if (is_callable([$this, 'done'])) $this->done($task);
+        } catch (\Throwable $th) {
+            // On failure, calls the fail method if exists
+            if (is_callable([$this, 'fail'])) $this->fail($task, $th);
+            throw new Exception("Task \"$task\" failed with message: " . $th->getMessage(), $th->getCode(), $th);
+        }
+    }
+
+    /**
+     * Runs a story.
+     * @param string $story Story name.
+     */
+    final public function story(string $story)
+    {
+        // Checks if the story exists
+        if (!is_callable([$this, $story])) throw new Exception("Story \"$story\" does not exist in the tasks file");
+
+        try {
+            // Calls the init for this story
+            if (is_callable([$this, 'initStory'])) $this->initStory($story);
+
+            // Calls the story
+            $this->{$story}();
+
+            // Calls the done method for this story
+            if (is_callable([$this, 'doneStory'])) $this->doneStory($story);
+        } catch (\Throwable $th) {
+            // On failure, calls the fail method if exists
+            if (is_callable([$this, 'failStory'])) $this->failStory($story, $th);
+            throw new Exception("Story \"$story\" failed with message: " . $th->getMessage(), $th->getCode(), $th);
+        }
+    }
+
+    /**
      * Groups a set of commands into a server.
      * @param string|array $server (Optional) Server name (or an array of server names) where to run the command.
      * @param callable $callback Callback with grouped command calls.

@@ -7,6 +7,7 @@ use Glowie\Core\Plugin;
 use Glowie\Plugins\Deploy\Commands\Config;
 use Glowie\Plugins\Deploy\Commands\Create;
 use Glowie\Plugins\Deploy\Commands\Run;
+use Glowie\Plugins\Deploy\Commands\Story;
 
 /**
  * Glowie plugin to deploy applications with SSH.
@@ -35,6 +36,7 @@ class Deploy extends Plugin
     public function register()
     {
         Firefly::custom('deploy', Run::class);
+        Firefly::custom('deploy', Story::class);
         Firefly::custom('deploy', Create::class);
         Firefly::custom('deploy', Config::class);
     }

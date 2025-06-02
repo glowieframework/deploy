@@ -6,7 +6,7 @@ use Glowie\Core\CLI\Command;
 use Glowie\Plugins\Deploy\Core\Connections;
 
 /**
- * Command to run the deploy tasks.
+ * Command to run a deploy story.
  * @category Command
  * @package glowieframework/deploy
  * @author Glowie
@@ -14,7 +14,7 @@ use Glowie\Plugins\Deploy\Core\Connections;
  * @license MIT
  * @link https://glowie.gabrielsilva.dev.br
  */
-class Run extends Command
+class Story extends Command
 {
 
     /**
@@ -29,15 +29,15 @@ class Run extends Command
             exit(127);
         }
 
-        // Gets the task name
-        $task = $this->getArg('task', 'deploy');
+        // Gets the story name
+        $story = $this->argOrFail('name');
 
         // Loads the tasks file
         $tasksClass = require_once($path);
 
-        // Calls the task method
+        // Calls the story method
         try {
-            $tasksClass->task($task);
+            $tasksClass->story($story);
         } catch (\Throwable $th) {
             $this->fail($th->getMessage());
             exit($th->getCode() ? $th->getCode() : 127);
