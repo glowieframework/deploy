@@ -136,7 +136,7 @@ $this->info('Running build...');
 
 ### Before initialization
 
-If you want to perform an action before your task runs, define the following method in your task file:
+If you want to perform an action before your task runs, define the following method in your tasks file:
 
 ```php
 public function init(string $task){
@@ -227,7 +227,7 @@ $version = $this->getArg('version'); // returns "1.0.0"
 You can also pass custom options:
 
 ```shell
-php firefly deploy:run --production
+php firefly deploy:run -production
 ```
 
 And retrieve from your task:
@@ -235,6 +235,78 @@ And retrieve from your task:
 ```php
 $isProduction = $this->hasOption('production'); // returns true
 ```
+
+## Working with stories
+
+A _story_ is a group of tasks executed in order during the deployment process, useful for organizing and isolating specific steps or operations.
+
+It works the same way as a deploy task. To define a story in the tasks file, create a PHP function with the name of the story. Example:
+
+```php
+public function pipeline(){
+
+    $this->task('setup_server');
+
+    $this->task('clone_repository');
+
+    $this->task('build_application');
+
+    $this->task('clear_cache');
+
+}
+```
+
+> [!IMPORTANT] The story method must not execute shell operations directly. Instead, it should invoke other task methods to perform those operations.
+
+### Running a story
+
+To run a deploy story from the CLI, use the following command:
+
+```shell
+php firefly deploy:story --name=pipeline
+```
+
+The `name` argument should match the name of the story function you want to call.
+
+### Before initialization
+
+If you want to perform an action before your story runs, define the following method in your tasks file:
+
+```php
+public function initStory(string $story){
+    // You can do anything here
+    $this->info("Starting $story...");
+}
+```
+
+The method will receive the story name as the first parameter.
+
+### After success
+
+If you want to do something when your story ends the execution with success (no command returned a code greater than `0`), create the following method in the tasks file:
+
+```php
+public function doneStory(string $story){
+    // You can do anything here
+    $this->success("$story ran successfully!");
+}
+```
+
+The method will receive the story name as the first parameter.
+
+### Handling errors
+
+If something in your story fails, the script execution will stop and an exception will be thrown. If you want to capture the error and do something with it (like sending a notification), create the following method in the tasks file:
+
+```php
+public function failStory(string $story, Throwable $th){
+    // You can do anything here
+    $this->error("$story failed! Stack trace:");
+    $this->error($th->getTraceAsString());
+}
+```
+
+The method will receive the story name as the first parameter, and the exception as the second.
 
 ## Notifications
 

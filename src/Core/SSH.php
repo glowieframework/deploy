@@ -73,7 +73,6 @@ class SSH
         // Parses the environment variables
         $env = [];
         foreach ($this->env as $key => $value) {
-            if ($value === false) continue;
             $env[] = sprintf('export %s=%s', $key, escapeshellarg($value));
         }
 
