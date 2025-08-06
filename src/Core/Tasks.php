@@ -82,6 +82,7 @@ trait Tasks
             if (is_callable([$this, 'done'])) $this->done($task);
         } catch (\Throwable $th) {
             // On failure, calls the fail method if exists
+            $this->clearScripts();
             if (is_callable([$this, 'fail'])) $this->fail($task, $th);
             throw new Exception("Task \"$task\" failed with message: " . $th->getMessage(), $th->getCode(), $th);
         }
@@ -107,6 +108,7 @@ trait Tasks
             if (is_callable([$this, 'doneStory'])) $this->doneStory($story);
         } catch (\Throwable $th) {
             // On failure, calls the fail method if exists
+            $this->clearScripts();
             if (is_callable([$this, 'failStory'])) $this->failStory($story, $th);
             throw new Exception("Story \"$story\" failed with message: " . $th->getMessage(), $th->getCode(), $th);
         }
@@ -184,7 +186,7 @@ trait Tasks
      * @param array $scripts Array of scripts.
      * @param string $serverName Name of the server.
      */
-    final function __runScriptsOnServer(array $scripts, string $serverName)
+    final public function __runScriptsOnServer(array $scripts, string $serverName)
     {
         // Checks if the server config exists
         $serverInfo = Config::get("deploy.servers.$serverName");

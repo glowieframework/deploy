@@ -41,9 +41,9 @@ class Run extends Command
         } catch (\Throwable $th) {
             $this->fail($th->getMessage());
             exit($th->getCode() ? $th->getCode() : 127);
+        } finally {
+            // End all connections
+            Connections::disconnectAll();
         }
-
-        // End all connections
-        Connections::disconnectAll();
     }
 }

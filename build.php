@@ -41,4 +41,10 @@ $phar->compressFiles(Phar::GZ);
 rename($pharPath, $binPath);
 @chmod($binPath, 0755);
 
-echo "PHAR created successfully.";
+$hash = hash_file('sha256', $binPath);
+
+file_put_contents(__DIR__ . '/build_hash.txt', $hash);
+
+echo "PHAR created successfully.\n";
+echo "Location: $binPath\n";
+echo "Hash SHA-256: $hash";

@@ -30,7 +30,7 @@ class Story extends Command
         }
 
         // Gets the story name
-        $story = $this->argOrFail('name');
+        $story = $this->getArg('name', 'pipeline');
 
         // Loads the tasks file
         $tasksClass = require_once($path);
@@ -41,9 +41,9 @@ class Story extends Command
         } catch (\Throwable $th) {
             $this->fail($th->getMessage());
             exit($th->getCode() ? $th->getCode() : 127);
+        } finally {
+            // End all connections
+            Connections::disconnectAll();
         }
-
-        // End all connections
-        Connections::disconnectAll();
     }
 }
