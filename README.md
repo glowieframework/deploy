@@ -2,6 +2,8 @@
 
 This is a plugin for [Glowie Framework](https://github.com/glowieframework/glowie) that allows deploying applications using automated SSH scripts. It supports notifications, tasks, and environment variables.
 
+You can also use Deploy in standalone mode, without the need for a Glowie installation.
+
 ## Installation
 
 ### In a Glowie project
@@ -37,11 +39,44 @@ If you want to create the tasks file manually in the current project directory, 
 php firefly deploy:create
 ```
 
+### Standalone
+
+You can use Deploy without installing Glowie. Simply download the binary from the [releases page](https://github.com/glowieframework/deploy/releases), give it execute permissions using `chmod +x`, and optionally add it to your system's `PATH` for easier access.
+
+If you already have Composer installed, you can install Deploy globally with the following command:
+
+```shell
+composer global require glowie/deploy
+```
+
+After that, make sure the Composer global `bin` directory is in your system's PATH so you can run Deploy from anywhere.
+
+To generate the `.deploy-tasks.php` file in the current working directory, run:
+
+```shell
+deploy create
+```
+
+To specify a different location, use the `--path` option.
+
 ## Configuration
+
+### In a Glowie project
 
 When you publish the plugin files, a configuration file named `Deploy.php` will be created in your `app/config` folder. This file is responsible for defining your deploy servers and notification settings.
 
-> [!CAUTION] Never store sensitive credentials (like passwords or API keys) directly in this file. Always use environment variables.
+> [!CAUTION]
+> Never store sensitive credentials (like passwords or API keys) directly in this file. Always use environment variables.
+
+### Standalone
+
+You can create a configuration file by running:
+
+```shell
+deploy config
+```
+
+This will generate a `config.php` file in the current working directory. To specify a different location, use the `--path` option.
 
 ### Servers
 
@@ -89,7 +124,7 @@ public function deploy(){
 }
 ```
 
-Each command will run in order and wait for the previous command to finish before its execution. If a remote command fails or returns an exit code greater than `0`, an exception will be thrown and the script will stop.
+Each command will run in order and wait for the previous command to finish before its execution. If a remote command fails or returns a **non-zero** exit code, an exception will be thrown and the script execution will stop.
 
 The output of each command will be printed to the terminal upon execution.
 
@@ -182,9 +217,12 @@ You can expose environment variables to the target servers using the `env()` met
 $this->env('custom_env', 'custom_value');
 ```
 
-> [!NOTE] Environment variables exposed using this method are shared across all servers.
+> [!NOTE]
+> Environment variables exposed using this method are shared across all servers.
 
 ## Running a deploy task
+
+### In a Glowie project
 
 Open the terminal in the root of your application and run:
 
@@ -209,6 +247,16 @@ You can also specify a custom config file if you're not using the default one:
 ```shell
 php firefly deploy:run --config=/path/to/config.php
 ```
+
+### Standalone
+
+All commands above can be executed directly without using the `php firefly deploy` prefix, as long as the binary is properly installed and accessible from your system's `PATH`.
+
+```shell
+deploy run
+```
+
+This will run in the current working directory, regardless of its location.
 
 ### Passing CLI arguments and options
 
@@ -256,7 +304,8 @@ public function pipeline(){
 }
 ```
 
-> [!IMPORTANT] The story method must not execute shell operations directly. Instead, it should invoke other task methods to perform those operations.
+> [!IMPORTANT]
+> The story method must not execute shell operations directly. Instead, it should invoke other task methods to perform those operations.
 
 ### Running a story
 
@@ -357,7 +406,7 @@ $this->notifyTelegram('Write your message to Telegram here!');
 
 ### Push notifications (with Alertzy)
 
-To send a message as a push notification to your phone, download the [Alertzy](https://alertzy.app) app in your phone and create an account. Then, grab your account key in the app and copy to your `.env` file:
+To send a message as a push notification to your phone, download the [Alertzy](https://alertzy.app) app on your phone and create an account. Then, grab your account key in the app and copy to your `.env` file:
 
 ```env
 DEPLOY_PUSH_KEY=...
@@ -369,7 +418,8 @@ Then, in your task, simply call:
 $this->notifyPush('Write a message to your phone here!');
 ```
 
-> [!NOTE] Alertzy has a limit of **100 push notifications per day**. After that limit is reached, notifications will stop being delivered.
+> [!NOTE]
+> Alertzy has a limit of **100 push notifications per day**. After that limit is reached, notifications will stop being delivered.
 
 ## Credits
 
